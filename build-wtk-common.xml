@@ -36,7 +36,7 @@
         </fileset>
     </path>
     
-    <path id="bootclasspath.sunwtk">
+    <path id="bootclasspath.sunwtklinux">
         <fileset dir="${wtk.home}/lib">
             <include name="jsr226.jar"/>
             <include name="jsr239.jar"/>
@@ -62,13 +62,15 @@
         </fileset>
     </path>
     
+    <!-- 
+    Sun WTK 2.5.2 on Linux requires only specifically named JARS and 
+    will not work with all jars in bootclasspath
+    -->
     <condition property="wtk.active.bootclasspath"
-        value="${toString:bootclasspath.wtkalljars}"
-        else="${toString:bootclasspath.sunwtk}">
+        value="${toString:bootclasspath.sunwtklinux}"
+        else="${toString:bootclasspath.wtkalljars}">
         
-        <resourceexists>
-            <file file="${wtk.home}/lib/nokiaapi.jar"/>
-        </resourceexists>
+        <os family="unix" />
     </condition>
     
 </project>
