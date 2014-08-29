@@ -72,7 +72,7 @@ the ResourceEditor without problems you can use this script.
     <!-- build IO lib -->
     <target name="IO-build" depends="init">
         <ant antfile="${IO}/antenna-build.xml" useNativeBasedir="true" target="build" />
-        <ant antfile="${IO-MIDP}/build.xml" useNativeBasedir="true" target="build" />
+        <ant antfile="${IO-MIDP}/antenna-build.xml" useNativeBasedir="true" target="build" />
         <copy file="${IO}/dist/IO.jar" todir="${releasepath}/bin/IO" />
         <copy file="${IO-MIDP}/dist/IO.jar" tofile="${releasepath}/bin/IO/IO-MIDP.jar" />
     </target> 
