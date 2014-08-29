@@ -15,7 +15,18 @@
     <taskdef resource="antenna.properties"/>
     <property name="src" location="src" />
     <property name="testpath" location="../../../auto-tests/LWUIT-S40-tests" />
-    <property name="wtk.home" value="c:\Nokia\Devices\Nokia_SDK_2_0_Java" />
+    <property environment="env"/>
+    
+    <condition property="wtk.home" 
+        value="${wtk.home}" 
+        else="${env.WTK_HOME}">
+        
+        <resourceexists>
+            <file file="${wtk.home}"/>
+        </resourceexists>
+    </condition>
+    
+    <!--<property name="wtk.home" value="c:\Nokia\Devices\Nokia_SDK_2_0_Java" />-->
     <property name="wtk.midp.version" value="2.0" />
     <property name="wtk.cldc.version" value="1.1" />
     <property name="UI-MIDP" value="..\..\MIDP\UI\dist\UI.jar" />
