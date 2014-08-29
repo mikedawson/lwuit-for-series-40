@@ -5,30 +5,38 @@
     <property name="wtk.java3d.enabled" value="true" />
     
     <!-- 
-        If something has set wtk.home, check it.  
-        Otherwise try environment variable WTK_HOME
+       If existing wtk.home does not exist - set it to 
+       environment variable
      -->
-    <condition property="wtk.home" 
-        value="${wtk.home}" 
-        else="${env.WTK_HOME}">
-        
-        <resourceexists>
-            <file file="${wtk.home}"/>
-        </resourceexists>
+    <available file="${wtk.home}" property="wtk.home.present"/>
+    
+    <condition property="wtk.home" value="${env.WTK_HOME}">
+        <and>
+            <not>
+                <resourceexists>
+                    <file file="${wtk.home}"/>
+                </resourceexists>
+            </not>
+            
+            <resourceexists>
+                <file file="${env.WTK_HOME}"/>
+            </resourceexists>
+        </and>
     </condition>
     
     <!-- Now check; if not fallback to default -->
     <condition property="wtk.home" 
-        value="${wtk.home}" 
-        else="c:\tools\Nokia\Devices\Nokia_SDK_2_0_Java">
+        value="c:\tools\Nokia\Devices\Nokia_SDK_2_0_Java">
         
-        <resourceexists>
-            <file file="${wtk.home}"/>
-        </resourceexists>
+        <not>
+            <resourceexists>
+                <file file="${wtk.home}"/>
+            </resourceexists>
+        </not>
+        
     </condition>
     
     <echo message="wtk.home Set to ${wtk.home}"/>
-    
     
     <path id="bootclasspath.wtkalljars">
         <fileset dir="${wtk.home}/lib" >

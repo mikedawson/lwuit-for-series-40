@@ -8,10 +8,7 @@
     <property name="wtk.cldc.version" value="1.1" />
     <property name="IO-lib" value="../../../IO/dist/IO.jar" />
 
-    <path id="bootclasspath.ref">
-        <fileset dir="${wtk.home}/lib" >
-            <include name="*.jar" />
-        </fileset>
+    <path id="libclasspath.ref">
         <fileset dir="../../../UI/dist">
             <include name="UI.jar" />
         </fileset>
@@ -36,7 +33,8 @@
             encoding="UTF-8" 
             source="1.3" 
             includeAntRuntime="false" 
-            classpathref="bootclasspath.ref"
+            classpathref="libclasspath.ref"
+            bootclasspath="${wtk.active.bootclasspath}"
         >
 
         </wtkbuild>
@@ -47,8 +45,8 @@
         </wtkjad>
     </target>
     <target name="package" depends="build, create-jad">
-        <wtkpackage libclasspath="${IO-lib}" preverify="true" jarfile="dist/IO.jar" jadfile="dist/IO.jad">
-            <bootclasspath refid="bootclasspath.ref" />
+        <wtkpackage libclasspath="${IO-lib}" preverify="true" jarfile="dist/IO.jar" jadfile="dist/IO.jad"
+            bootclasspath="${wtk.active.bootclasspath}" classpathref="libclasspath.ref">
 
             <fileset dir="classes" />
         </wtkpackage>
