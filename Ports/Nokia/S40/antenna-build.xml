@@ -15,18 +15,9 @@
     <taskdef resource="antenna.properties"/>
     <property name="src" location="src" />
     <property name="testpath" location="../../../auto-tests/LWUIT-S40-tests" />
-    <property environment="env"/>
     
-    <condition property="wtk.home" 
-        value="${wtk.home}" 
-        else="${env.WTK_HOME}">
-        
-        <resourceexists>
-            <file file="${wtk.home}"/>
-        </resourceexists>
-    </condition>
+    <include file="../../../build-wtk-common.xml"/>
     
-    <!--<property name="wtk.home" value="c:\Nokia\Devices\Nokia_SDK_2_0_Java" />-->
     <property name="wtk.midp.version" value="2.0" />
     <property name="wtk.cldc.version" value="1.1" />
     <property name="UI-MIDP" value="..\..\MIDP\UI\dist\UI.jar" />
@@ -82,8 +73,10 @@
             destdir="classes/" 
             encoding="UTF-8" 
             source="1.3" 
-            includeAntRuntime="false" >
-            <bootclasspath refid="bootclasspath.ref" />
+            includeAntRuntime="false" 
+            classpathref="bootclasspath.ref">
+                <bootclasspath refid="bootclasspath.ref"/>
+
         </wtkbuild>
         <copy todir="classes/">
             <fileset dir="${src}">

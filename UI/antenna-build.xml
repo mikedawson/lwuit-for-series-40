@@ -6,11 +6,7 @@
     
     <property name="wtk.midp.version" value="2.0" />
     <property name="wtk.cldc.version" value="1.1" />
-    <path id="bootclasspath.ref">
-        <fileset dir="${wtk.home}/lib" >
-            <include name="*.jar" />
-        </fileset>
-    </path>
+    
 
     <target name="clean">
         <delete dir="classes" />
@@ -27,10 +23,11 @@
             destdir="classes/" 
             encoding="UTF-8" 
             source="1.3" 
-            includeAntRuntime="false" 
-            classpathref="bootclasspath.ref"
+            includeAntRuntime="false"
+            bootclasspath="${wtk.active.bootclasspath}"
         >
-                
+            
+
         </wtkbuild>
 
     </target>
@@ -39,8 +36,8 @@
         </wtkjad>
     </target>
     <target name="package" depends="build, create-jad">
-        <wtkpackage preverify="true" jarfile="dist/UI.jar" jadfile="dist/UI.jad">
-            <bootclasspath refid="bootclasspath.ref" />
+        <wtkpackage preverify="true" jarfile="dist/UI.jar" jadfile="dist/UI.jad" 
+            bootclasspath="${wtk.active.bootclasspath}">
 
             <fileset dir="classes" />
         </wtkpackage>

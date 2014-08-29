@@ -1,6 +1,9 @@
 <project name="included" basedir="." default="...">
     <property environment="env"/>
     
+    <!-- Required to make LWUIT compile with Sun WTK and antenna-->
+    <property name="wtk.java3d.enabled" value="true" />
+    
     <!-- 
         If something has set wtk.home, check it.  
         Otherwise try environment variable WTK_HOME
@@ -23,7 +26,50 @@
             <file file="${wtk.home}"/>
         </resourceexists>
     </condition>
-
+    
     <echo message="wtk.home Set to ${wtk.home}"/>
+    
+    
+    <path id="bootclasspath.wtkalljars">
+        <fileset dir="${wtk.home}/lib" >
+            <include name="*.jar" />
+        </fileset>
+    </path>
+    
+    <path id="bootclasspath.sunwtk">
+        <fileset dir="${wtk.home}/lib">
+            <include name="jsr226.jar"/>
+            <include name="jsr239.jar"/>
+            <include name="jsr75.jar"/>
+            <include name="satsa-crypto.jar"/>
+            <include name="jsr229.jar"/>
+            <include name="satsa-pki.jar"/>
+            <include name="jsr179.jar"/>
+            <include name="jsr238.jar"/>
+            <include name="jsr211.jar"/>
+            <include name="j2me-xmlrpc.jar"/>
+            <include name="jsr180.jar"/>
+            <include name="mmapi.jar"/>
+            <include name="satsa-jcrmi.jar"/>
+            <include name="jsr082.jar"/>
+            <include name="satsa-apdu.jar"/>
+            <include name="jsr184.jar"/>
+            <include name="j2me-ws.jar"/>
+            <include name="wma20.jar"/>
+            <include name="jsr234.jar"/>
+            <include name="cldcapi11.jar"/>
+            <include name="midpapi20.jar"/>
+        </fileset>
+    </path>
+    
+    <condition property="wtk.active.bootclasspath"
+        value="${toString:bootclasspath.wtkalljars}"
+        else="${toString:bootclasspath.sunwtk}">
+        
+        <resourceexists>
+            <file file="${wtk.home}/lib/nokiaapi.jar"/>
+        </resourceexists>
+    </condition>
+    
 </project>
 
