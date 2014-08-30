@@ -19,4 +19,4 @@ build-release.properties
 *~
 .ant-targets-build.xml
 .ant-targets-antenna-build.xml
-
+MIDP-binaries

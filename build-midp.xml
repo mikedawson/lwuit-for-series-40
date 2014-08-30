@@ -1,0 +1,74 @@
+<!--
+
+LWUIT MIDP Jar Builder - Builds the MIDP UI and IO jars.
+
+Run with antenna in the classpath and WTK_HOME set to the 
+wireless toolkit location being used.
+
+-->
+
+<project name="LWUIT-MIDP-Release" default="dist" basedir=".">
+
+    <taskdef resource="antenna.properties"/>
+    
+    <include file="build-wtk-common.xml"/>
+    
+    <property name="wtk.midp.version" value="2.0" />
+    <property name="wtk.cldc.version" value="1.1" />
+    
+    
+
+    <target name="init">
+        <property environment="env"/>
+        
+        <property name="dist.midp.dir" value="MIDP-binaries"/>
+        
+        <condition property="build.properties.filename" 
+            value="build-release.properties" 
+            else="build-release.default.properties">
+            
+            <resourceexists>
+                <file file="build-release.properties"/>
+            </resourceexists>
+        </condition>
+        
+        <echo message="Loading build properties from ${build.properties.filename}"/>
+        
+        <property file="${build.properties.filename}"/> 
+        
+        <echo message="WTK Home is : ${wtk.home}"/>
+    </target>
+    
+    <target name="dist" depends="init">
+        <ant antfile="UI/antenna-build.xml" useNativeBasedir="true" target="package" />
+        <ant antfile="IO/antenna-build.xml" useNativeBasedir="true" target="package" />
+        <ant antfile="Ports/MIDP/IO_MIDP/antenna-build.xml" useNativeBasedir="true" target="package" />
+        <ant antfile="Ports/MIDP/UI/antenna-build.xml" useNativeBasedir="true" target="package" />
+    </target>
+    
+    <target name="jad" depends="dist">
+        <wtkjad jadfile="${dist.midp.dir}/LWUIT-MIDP.jad" name="LWUIT-UI" vendor="Nokia" version="1.5" encoding="UTF-8">
+            
+        </wtkjad>
+        
+        <wtkjad jadfile="${dist.midp.dir}/LWUIT-MIDP-IO.jad" name="LWUIT-UI" vendor="Nokia" version="1.5" encoding="UTF-8">
+            
+        </wtkjad>
+    </target>
+    
+    <target name="create-jars" depends="dist">
+    
+        <wtkpackage preverify="true" jarfile="${dist.midp.dir}/LWUIT-MIDP.jar" jadfile="${dist.midp.dir}/LWUIT-MIDP.jad" 
+            bootclasspath="${wtk.active.bootclasspath}">
+            <zipgroupfileset dir="Ports/MIDP/UI/dist" includes="UI.jar"/>
+            <zipgroupfileset dir="UI/dist" includes="UI.jar"/>
+        </wtkpackage>
+        
+        <wtkpackage preverify="true" jarfile="${dist.midp.dir}/LWUIT-MIDP-IO.jar" jadfile="${dist.midp.dir}/LWUIT-MIDP-IO.jad" 
+            bootclasspath="${wtk.active.bootclasspath}" classpath="${dist.midp.dir}/LWUIT-MIDP.jar">
+            <zipgroupfileset dir="Ports/MIDP/IO_MIDP/dist" includes="IO.jar"/>
+            <zipgroupfileset dir="IO/dist" includes="IO.jar"/>
+        </wtkpackage>
+    </target>
+
+</project>
