@@ -7,7 +7,7 @@ wireless toolkit location being used.
 
 -->
 
-<project name="LWUIT-MIDP-Release" default="dist" basedir=".">
+<project name="LWUIT-MIDP-Release" default="create-jars" basedir=".">
 
     <taskdef resource="antenna.properties"/>
     
@@ -22,6 +22,7 @@ wireless toolkit location being used.
         <property environment="env"/>
         
         <property name="dist.midp.dir" value="MIDP-binaries"/>
+        <mkdir dir="${dist.midp.dir}"/>
         
         <condition property="build.properties.filename" 
             value="build-release.properties" 
@@ -56,7 +57,7 @@ wireless toolkit location being used.
         </wtkjad>
     </target>
     
-    <target name="create-jars" depends="dist">
+    <target name="create-jars" depends="dist,jad">
     
         <wtkpackage preverify="true" jarfile="${dist.midp.dir}/LWUIT-MIDP.jar" jadfile="${dist.midp.dir}/LWUIT-MIDP.jad" 
             bootclasspath="${wtk.active.bootclasspath}">
