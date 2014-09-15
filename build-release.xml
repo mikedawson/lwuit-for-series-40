@@ -44,15 +44,35 @@ the ResourceEditor without problems you can use this script.
         <mkdir dir="${releasepath}/examples" />
         <mkdir dir="${releasepath}/resourceeditor" />
         <mkdir dir="${releasepath}/releasenotes" />
+        
+        <property environment="env"/>
+        
+        <condition property="build.properties.filename" 
+            value="build-release.properties" 
+            else="build-release.default.properties">
+            
+            <resourceexists>
+                <file file="build-release.properties"/>
+            </resourceexists>
+        </condition>
+        
+        <echo message="Loading build properties from ${build.properties.filename}"/>
+        
+        <property file="${build.properties.filename}"/> 
+        
+        <echo message="WTK Home is : ${wtk.home}"/>
+        
+           
     </target>
+    
     <!--build s40 port -->
     <target name="S40-build" depends="init">
         <ant antfile="${s40port}/antenna-build.xml" useNativeBasedir="true" target="release" />
     </target>
     <!-- build IO lib -->
     <target name="IO-build" depends="init">
-        <ant antfile="${IO}/build.xml" useNativeBasedir="true" target="build" />
-        <ant antfile="${IO-MIDP}/build.xml" useNativeBasedir="true" target="build" />
+        <ant antfile="${IO}/antenna-build.xml" useNativeBasedir="true" target="build" />
+        <ant antfile="${IO-MIDP}/antenna-build.xml" useNativeBasedir="true" target="build" />
         <copy file="${IO}/dist/IO.jar" todir="${releasepath}/bin/IO" />
         <copy file="${IO-MIDP}/dist/IO.jar" tofile="${releasepath}/bin/IO/IO-MIDP.jar" />
     </target> 

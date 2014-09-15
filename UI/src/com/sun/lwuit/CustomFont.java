@@ -44,6 +44,95 @@ class CustomFont extends Font {
     private String charsets;
     private int color;
     
+    
+    /*
+     * forms of arabic / connected characters
+     */
+    
+    /** Isolated Form**/
+    public static final int ISO = 1;
+    
+    /** Beginning Form connected to next character */
+    public static final int BEG = 4;
+    
+    /** Middle Form connected on both sides */
+    public static final int MID = 3;
+    
+    /** End form connected to the previous character only*/
+    public static final int END = 2;
+    
+    /** Whitespace in word */
+    public static final int WS = 4;
+    
+    /**
+     * This is a mapping of arabic characters to glyph forms.  
+     * 
+     * For standard Arabic or Persian this is as per default unicode.  For
+     * Pashto this uses little used space within the unicode space (e.g. <65000) 
+     * 
+     * See the DejaVuModifiedPS.ttf file 
+     * 
+     */
+    static char[][] arabicCharList = {
+        //START ARABIC
+            //NORMAL UNICODE, ISOLATED, END, MIDDLE, BEGINNING
+            {'\u0623', '\uFE83', '\uFE84'}, //ALEF with hamza above
+            {'\u0622', '\uFE81', '\uFE82'}, //ALEF with madda above
+            {'\u0627', '\uFE8D', '\uFE8E'}, //ALEF
+            {'\u0626', '\uFE87', '\uFE88'}, //ALEF with hamza below
+            {'\u0628', '\uFE8F', '\uFE90', '\uFE92','\uFE91'},//BA
+            {'\u062A', '\uFE95', '\uFE96', '\uFE98', '\uFE97'},//TA
+            {'\u062B', '\uFE99', '\uFE9A', '\uFE9C', '\uFE9B'},//TAY
+            {'\u062C', '\uFE9D', '\uFE9E', '\uFEA0', '\uFE9F'},//GIM
+            {'\u062D', '\uFEA1', '\uFEA2', '\uFEA4', '\uFEA3'},//HA
+            {'\u062E', '\uFEA5', '\uFEA6', '\uFEA8', '\uFEA7'},//HA
+            {'\u062F', '\uFEA9', '\uFEAA'},//DAL
+            {'\u0630', '\uFEAB', '\uFEAC'},//DAL
+            {'\u0631', '\uFEAD', '\uFEAE'},//RA
+            {'\u0632', '\uFEAF', '\uFEB0'},//ZAYN
+            {'\u0633', '\uFEB1', '\uFEB2', '\uFEB4', '\uFEB3'},//SIN
+            {'\u0634', '\uFEB5', '\uFEB6', '\uFEB8', '\uFEB7'},//SHEEN
+            {'\u0635', '\uFEB9', '\uFEBa', '\uFEBC', '\uFEBB'},//SAD
+            {'\u0636', '\uFEBD', '\uFEBE', '\uFEC0', '\uFEBF'},//DAD
+            {'\u0637', '\uFEC1', '\uFEC2', '\uFEC4', '\uFEB3'},//TA
+            {'\u0638', '\uFEC5', '\uFEC6', '\uFEC8', '\uFEB7'},//ZA
+            {'\u0639', '\uFEC9', '\uFECA', '\uFECC', '\uFEBB'},//AYN
+            {'\u063A', '\uFECD', '\uFECE', '\uFED0', '\uFECF'},//GAYN
+            {'\u0641', '\uFED1', '\uFED2', '\uFED4', '\uFED3'},//FA
+            {'\u0642', '\uFED5', '\uFED6', '\uFED8', '\uFED7'},//QAF
+            {'\u0643', '\uFED9', '\uFEDA', '\uFEDC', '\uFEDB'},//KAF
+            {'\u0644', '\uFEDD', '\uFEDE', '\uFEE0', '\uFEDF'},//LAM
+            {'\u0645', '\uFEE1', '\uFEE2', '\uFEE4', '\uFEE3'},//MIM
+            {'\u0646', '\uFEE5', '\uFEE6', '\uFEE8', '\uFEE7'},//NUN
+            {'\u0647', '\uFEE9', '\uFEEA', '\uFEEC', '\uFEEB'},//HA
+            {'\u0648', '\uFEED', '\uFEEE'},//WAW
+            {'\u064A', '\uFEF1', '\uFEF2', '\uFEF4', '\uFEF3'},//YA
+            {'\u0622', '\uFE81', '\uFE82'},//ALIF MADDAH
+            {'\u0629', '\uFE93', '\uFE94'},//TA MURBAUTAH
+            {'\u0649', '\uFEEF', '\uFEF0'},//ALIF MAQSURAH
+            {'\u06A9', '\uFB8E', '\uFB8F', '\uFB91', '\uFB90'}, //GOF? ARABIC KEHEH
+            //END ARABIC
+            //START PERSIAN ISOLATED, END, MIDDLE, Beginning
+            {'\u067E', '\uFB56', '\uFB57', '\uFB59', '\uFB58'},   //Peh
+            {'\u0686', '\uFB7A', '\uFB7B', '\uFB7D', '\uFB7C'}, //CHEH
+            {'\u0698', '\uFB8A', '\uFB8B'  }, //ZEH
+            {'\u06AF', '\uFB92', '\uFB93', '\uFB95', '\uFB94' }, //GOF
+            //END PERSIAN
+            //START PASHTO - matches Pashto Kror Asisatype mappings
+            { '\u067c', '\u067c', '\uff00', '\uff02', '\uff01'},            //SPECIAL TAY with two dots below ??
+            { '\u0681', '\u0681', '\uff03', '\uff05', '\uff04'},   //special zim    ???
+            { '\u0689', '\u0689', '\uff16' }, //special doll with dot below ??
+            { '\u0693', '\u0693', '\uff17' }, // special ray with dot below ??
+            { '\u0696', '\u0696', '\uff18' }, //special gay ?
+            { '\u069A', '\u069A', '\uFF09', '\uFF0B', '\uFF0A'}, // seen with two dots ?
+            { '\u06AB', '\u06AB', '\uff0c', '\uff0f', '\uff0d' }, //special gof with dot below hook   ??
+            { '\u06BC', '\u06BC', '\uff10', '\uff12', '\uff11' }, //special noon with dot ??
+            { '\u06D0', '\u06D0', '\uff13', '\uff15', '\uff14' }, //pasta yey  ??
+            { '\u06CC', '\u06cc', '\ufbfd', '\ufbff', '\ufbfe' }, //narina yey ??
+            { '\u06CD', '\u06CD', '\uff19' }, //xezina yey ??
+            { '\u0626', '\u0626', '\ufe8a', '\ufe8c', '\ufe8b'}  //f?iliya ye  ?? 
+    };
+    
     // package protected for the resource editor
     Image cache;
     
@@ -210,6 +299,99 @@ class CustomFont extends Font {
             }
         }
     }
+    
+    /**
+     * Provides the required sub character 
+     * 
+     * @param c - the character to get a glyph for
+     * @param form (ISO, BEG, MID or END)
+     * @return the glyph according to arabicCharList
+     */
+    private static final char subChar(char c, int form) {
+        for(int i = 0; i < arabicCharList.length; i++) {
+           if(arabicCharList[i][0] == c) {
+               if(arabicCharList[i].length > form) {
+                   return arabicCharList[i][form];
+               }
+           }
+        }
+        return c;
+    }
+    
+    /**
+     * Determines if the character c has a form (ISO, BEG, MID or END) 
+     * according to arabicCharList
+     * 
+     * @param c
+     * @param form (ISO, BEG, MID or END)
+     * @return true if the form exists, false otherwise
+     */
+    private static final boolean charHasForm(char c, int form) {
+        for(int i = 0; i < arabicCharList.length; i++) {
+           if(arabicCharList[i][0] == c) {
+               if(arabicCharList[i].length > form) {
+                   return true;
+               }
+           }
+        }
+        return false;
+    }
+    
+    
+    /**
+     * Given a string that has been detected as an arabic String it will 
+     * 'arabize' by replacing glyphs according to if they are at the start
+     * middle or end of the word and if they are intended to connect
+     * 
+     * This works by having an array called arabicCharList.  It is a multidimensional
+     * in the format of with an array for each character.
+     * 
+     *  Character Code => isolated form, end form, middle form, beginning form
+     * 
+     * For this to work the LWUIT CustomFont in use must have a bitmap for each
+     * glyph that will be used.
+     * 
+     * @see arabiccharlist
+     * 
+     * @param - s - the string to be arabized
+     * @return s as an array of arabized glyphs
+     */
+    public String arabize(String s) {
+        char[] ret = s.toCharArray();
+        char[] c = s.toCharArray();
+        for(int i = 0; i < c.length; i++) {
+            boolean prevCharConnects = false;
+            int form = ISO;
+            if(i < c.length -1) {
+                char prevChar = c[i+1];
+                prevCharConnects = charHasForm(c[i+1], BEG) || charHasForm(c[i+1], MID);
+            }
+            boolean nextCharConnects = false;
+            if(i > 0){
+                char nextChar = c[i-1];
+                nextCharConnects = charHasForm(c[i-1], MID) || charHasForm(c[i-1], END);
+            }
+            if(prevCharConnects) {
+                if(nextCharConnects) {
+                    form = MID;
+                }else {
+                    form = END;
+                }
+            }else {
+                if(nextCharConnects) {
+                    form = BEG;
+                }else {
+                    form = ISO;
+                }
+            }
+            if(form == MID && charHasForm(c[i], MID) == false) {
+                //this is a character that has no middle form and goes only on the end
+                form = END;
+            }
+            ret[i] = subChar(c[i], form);
+        }
+        return new String(ret);
+    }
 
     /**
      * Override this frequently used method for a slight performance boost...
@@ -226,6 +408,9 @@ class CustomFont extends Font {
             for(int i = offset ; i < length ; i++) {
                 if(Display.getInstance().isRTL(data[i])) {
                     String s = Display.getInstance().convertBidiLogicalToVisual(new String(data, offset, length));
+                    if(Display.getInstance().isArabized()) {
+                        s = arabize(s);
+                    }
                     data = s.toCharArray();
                     offset = 0;
                     length = s.length();

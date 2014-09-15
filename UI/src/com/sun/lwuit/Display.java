@@ -1948,6 +1948,27 @@ public final class Display {
     public void setBidiAlgorithm(boolean activate) {
         impl.setBidiAlgorithm(activate);
     }
+    
+    /**
+     * Indicates whether or not the arabization engine to connect arabic
+     * letters is in use
+     * 
+     * @return true if arabization engine should be used, false otherwise
+     */
+    public boolean isArabized() {
+        return impl.isArabized();
+    }
+    
+    /**
+     * Indicates whether or not the arabization engine to connect arabic
+     * letters is in use
+     * 
+     * @param activate set to true to enable arabization engine, false to disable
+     */
+    public void setArabizeAlgorithm(boolean activate) {
+        impl.setArabizeAlgorithm(activate);
+    }
+    
 
     /**
      * Converts the given string from logical bidi layout to visual bidi layout so

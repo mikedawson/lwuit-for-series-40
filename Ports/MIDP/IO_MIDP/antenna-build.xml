@@ -1,15 +1,14 @@
 <project name="LWUIT-IO-MIDP" default="package" basedir=".">
     <taskdef resource="antenna.properties"/>
     <property name="src" location="src" />
-    <property name="wtk.home" value="c:\tools\Nokia\Devices\Nokia_SDK_2_0_Java" />
+    
+    <include file="../../../build-wtk-common.xml"/>
+    
     <property name="wtk.midp.version" value="2.0" />
     <property name="wtk.cldc.version" value="1.1" />
     <property name="IO-lib" value="../../../IO/dist/IO.jar" />
 
-    <path id="bootclasspath.ref">
-        <fileset dir="${wtk.home}/lib" >
-            <include name="*.jar" />
-        </fileset>
+    <path id="libclasspath.ref">
         <fileset dir="../../../UI/dist">
             <include name="UI.jar" />
         </fileset>
@@ -34,8 +33,10 @@
             encoding="UTF-8" 
             source="1.3" 
             includeAntRuntime="false" 
+            classpathref="libclasspath.ref"
+            bootclasspath="${wtk.active.bootclasspath}"
         >
-            <bootclasspath refid="bootclasspath.ref" />
+
         </wtkbuild>
 
     </target>
@@ -44,8 +45,8 @@
         </wtkjad>
     </target>
     <target name="package" depends="build, create-jad">
-        <wtkpackage libclasspath="${IO-lib}" preverify="true" jarfile="dist/IO.jar" jadfile="dist/IO.jad">
-            <bootclasspath refid="bootclasspath.ref" />
+        <wtkpackage libclasspath="${IO-lib}" preverify="true" jarfile="dist/IO.jar" jadfile="dist/IO.jad"
+            bootclasspath="${wtk.active.bootclasspath}" classpathref="libclasspath.ref">
 
             <fileset dir="classes" />
         </wtkpackage>

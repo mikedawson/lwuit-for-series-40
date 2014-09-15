@@ -70,6 +70,9 @@ public abstract class LWUITImplementation {
     private Graphics lwuitGraphics;
 
     private static boolean bidi;
+    
+    /** Whether or not to use the Arabization system for Arabic connected letters */
+    private static boolean arabized;
 
     /**
      * Useful since the content of a single element touch event is often recycled
@@ -2351,6 +2354,26 @@ public abstract class LWUITImplementation {
     public void setBidiAlgorithm(boolean activate) {
         bidi = activate;
     }
+    
+    /**
+     * Indicates whether or not the arabization engine to connect arabic
+     * letters is in use
+     * 
+     * @return true if arabization engine should be used, false otherwise
+     */
+    public boolean isArabized() {
+        return arabized;
+    }
+    
+    /**
+     * Indicates whether or not the arabization engine to connect arabic
+     * letters is in use
+     * 
+     * @param activate set to true to enable arabization engine, false to disable
+     */
+    public void setArabizeAlgorithm(boolean activate) {
+        arabized = activate;
+    }
 
     /**
      * Converts the given string from logical bidi layout to visual bidi layout so
@@ -2417,6 +2440,11 @@ public abstract class LWUITImplementation {
      * @return true if the charcter is an RTL character
      */
     public boolean isRTL(char c) {
+        //Arabic numbers are actually always left to right
+        //this is arabic number 0 to 9
+        if(c >= '\u06f0' && c <= '\u06f9') {
+            return false;
+        }
         return (c >= RTL_RANGE_BEGIN && c <= RTL_RANGE_END);
     }
 

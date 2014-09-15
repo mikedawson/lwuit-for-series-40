@@ -15,3 +15,8 @@ Series-40-binaries
 bin
 !Maps_API.jar
 !Apps/**/*themes.jar
+build-release.properties
+*~
+.ant-targets-build.xml
+.ant-targets-antenna-build.xml
+MIDP-binaries
