@@ -43,6 +43,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.geom.Dimension;
 import com.sun.lwuit.geom.Rectangle;
+import com.sun.lwuit.impl.LWUITImplementation;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
@@ -267,6 +268,13 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     static private final int DEFAULT_LINK_COLOR = 0x0000ff;
 
 
+    /**
+     * Space reservation for images where one of height or width is left unspecified
+     * e.g. where width is specified but height is not
+     * Array : Top, Left, Bottom, Right
+     */
+    protected int[] imgReservationSpace = null;
+    
     // Document colors
     private int bgColor=DEFAULT_BGCOLOR;
     private int textColor=DEFAULT_TEXT_COLOR;
@@ -2251,6 +2259,13 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
             String imageUrl = imgElement.getAttributeById(HTMLElement.ATTR_SRC);
             Label imgLabel=null;
+            
+            if(imgReservationSpace == null) {
+                Style s = UIManager.getInstance().getComponentStyle("Label");
+                imgReservationSpace = new int[] { s.getPadding(TOP), 
+                    s.getPadding(LEFT), s.getPadding(BOTTOM), s.getPadding(RIGHT)};
+            }
+            
             if (imageUrl!=null) {
 
                 String alignStr=imgElement.getAttributeById(HTMLElement.ATTR_ALIGN);
@@ -2316,15 +2331,15 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
                     
                     if ((iWidth!=0) || (iHeight!=0)) { // reserve space while loading image if either width or height are specified, otherwise we don't know how much to reserve
-                        iWidth+=imgLabel.getStyle().getPadding(Component.LEFT)+imgLabel.getStyle().getPadding(Component.RIGHT);
-                        iHeight+=imgLabel.getStyle().getPadding(Component.TOP)+imgLabel.getStyle().getPadding(Component.BOTTOM);
+                        iWidth+=imgReservationSpace[LEFT] + imgReservationSpace[RIGHT];
+                        iHeight+=imgReservationSpace[TOP] + imgReservationSpace[BOTTOM];
                         imgLabel.setPreferredSize(new Dimension(iWidth,iHeight));
                     } else { // If no space is reserved, make a minimal text, otherwise LWUIT won't calculate the size right after the image loads
                         if ((imgLabel.getText()==null) || (imgLabel.getText().equals(""))) {
                             imgLabel.setText(" ");
                         }
                     }
-
+                    
                     // It is important that the padding of the image component itself will be all 0
                     // This is because when the image is loaded, its preferred size is checked to see if its width/height were preset by the width/height attribute
                     imgLabel.getSelectedStyle().setPadding(0,0,0,0);

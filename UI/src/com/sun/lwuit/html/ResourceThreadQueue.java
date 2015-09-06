@@ -544,8 +544,8 @@ class ResourceThreadQueue {
             label.setText(""); // remove the alternate text (important to do here before checking the width/height)
 
             // Was set in HTMLComponent.handleImage if the width/height attributes were in the tag
-            int width=label.getPreferredW()-label.getStyle().getPadding(Component.LEFT)-label.getStyle().getPadding(Component.RIGHT);
-            int height=label.getPreferredH()-label.getStyle().getPadding(Component.TOP)-label.getStyle().getPadding(Component.BOTTOM);
+            int width=label.getPreferredW()-htmlC.imgReservationSpace[Component.LEFT]-htmlC.imgReservationSpace[Component.RIGHT];
+            int height=label.getPreferredH()-htmlC.imgReservationSpace[Component.TOP]-htmlC.imgReservationSpace[Component.BOTTOM];
 
             if (width!=0) {
                 if (height==0) { // If only width was specified, height should be calculated so the image keeps its aspect ratio
@@ -559,8 +559,8 @@ class ResourceThreadQueue {
 
             if (width!=0) { // if any of width or height were not 0, the other one was set to non-zero above, so this check suffices
                 img=img.scaled(width, height);
-                width+=label.getStyle().getPadding(Component.LEFT)+label.getStyle().getPadding(Component.RIGHT);
-                height+=label.getStyle().getPadding(Component.TOP)+label.getStyle().getPadding(Component.BOTTOM);
+                width+=htmlC.imgReservationSpace[Component.LEFT]+htmlC.imgReservationSpace[Component.RIGHT];
+                height+=htmlC.imgReservationSpace[Component.TOP]+htmlC.imgReservationSpace[Component.BOTTOM];
                 label.setPreferredSize(new Dimension(width,height));
             }
 
