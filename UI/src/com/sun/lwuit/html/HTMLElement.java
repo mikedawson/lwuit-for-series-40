@@ -155,10 +155,16 @@ public class HTMLElement extends Element {
  public static final int TAG_TBODY = 79;
  public static final int TAG_TFOOT = 80;
 
+ //Media tags (not really HTML4 - but can be dealt with
+ public static final int TAG_AUDIO = 81;
+ public static final int TAG_VIDEO = 82;
+ 
  //Text nodes (not an actual tag - text segments are added by the parser as the 'text' tag
- public static final int TAG_TEXT = 81;
+ public static final int TAG_TEXT = 83;
+ 
+ 
 
- private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_TFOOT; // In any case we exclude TAG_TEXT, which is given only on text element creation
+ private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_VIDEO; // In any case we exclude TAG_TEXT, which is given only on text element creation
 
 
 /**
@@ -179,7 +185,9 @@ static final String[] TAG_NAMES = {
     ,"hr","optgroup","style","b","i","big","small","fieldset"
     //html4 tags
     ,"u","font","del","ins","tt","basefont","menu","s","strike","center","dir","map","area","legend","sub","sup","noscript","noframes"
-    ,"thead","tbody","tfoot"
+    ,"thead","tbody","tfoot",
+    //media elements
+    "audio","video"
     ,"text"
 };
 
@@ -269,6 +277,10 @@ static final String[] TAG_NAMES = {
  public static final int ATTR_DISABLED = 71;
  public static final int ATTR_READONLY = 72;
  public static final int ATTR_ISMAP = 73;
+ 
+ //Media tags
+ public static final int ATTR_AUTOPLAY = 74;
+ public static final int ATTR_CONTROLS = 75;
 
   /**
   * Defines the allowed attribute names, these are specified according to the ATTR_* constants numbering.
@@ -282,7 +294,7 @@ static final String[] TAG_NAMES = {
     "cols","rows","dir","border",
     "color","face","shape","coords","usemap",
     "lang","cellspacing","cellpadding","frame","rules",
-    "disabled","readonly","ismap"
+    "disabled","readonly","ismap", "autoplay", "controls"
  };
 
  /**
@@ -603,8 +615,18 @@ static final String[] TAG_NAMES = {
         ATTR_ALIGN,
         ATTR_VALIGN
      }, //TAG_TFOOT = 80;
-     {}, //TEXT = 81;
-
+     {
+         ATTR_AUTOPLAY,
+         ATTR_SRC,
+         ATTR_CONTROLS
+     },//TAG_AUDIO = 81
+     {
+         ATTR_AUTOPLAY,
+         ATTR_SRC,
+         ATTR_CONTROLS
+     },//TAG_VIDEO = 82
+     {} //TEXT = 83;
+     
  };
 
 
@@ -723,6 +745,8 @@ static final String[] TAG_NAMES = {
     TYPE_NMTOKEN, //ATTR_DISABLED = 71;
     TYPE_NMTOKEN, //ATTR_READONLY = 72;
     TYPE_NMTOKEN, //ATTR_ISMAP = 73;
+    TYPE_CDATA,//ATTR_AUTOPLAY = 74
+    TYPE_CDATA //ATTR_CONTROLS = 57
  };
 
 /**

@@ -410,6 +410,9 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     private int superscript; // keeps track of current superscript level (negative means subscript)
     private int maxSuperscript; // keeps track of teh maximal superscript value of the current line
     Hashtable counters; // CSS content counters
+    
+    //Audio and Video tags
+    private Vector mediaTags;
 
     private Vector containers=new Vector();
     //private Vector elementsWithStyleAttr=new Vector();
@@ -1171,6 +1174,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
                         if (threadQueue.getCSSCount()==-1) {
                             displayPage();
+                            checkAutoplay();
                         }
                         //if ( ((!showImages) || (threadQueue.getQueueSize()==0)) {
                         if (threadQueue.getQueueSize()==0) {
@@ -1197,6 +1201,43 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
             documentReady(docInfo, newDoc);
         }
 
+    }
+    
+    void checkAutoplay() {
+        if(mediaTags != null && mediaTags.size() > 0) {
+            HTMLElement autoplayEl = null;//we only handle one autoplay
+            for(int i = 0; i < mediaTags.size(); i++) {
+                HTMLElement mediaEl = (HTMLElement)mediaTags.elementAt(i);
+                String autoplayAttr = mediaEl.getAttributeById(
+                        HTMLElement.ATTR_AUTOPLAY);
+                if(autoplayAttr != null && autoplayAttr.equalsIgnoreCase("autoplay")) {
+                    autoplayEl = mediaEl;
+                    break;
+                }
+            }
+            
+            
+            
+            if(autoplayEl != null && htmlCallback != null) {
+                final String autoplaySrc = convertURL(
+                    autoplayEl.getAttributeById(HTMLElement.ATTR_SRC));
+                final int type = HTMLCallback.MEDIA_AUDIO;
+                if(Display.getInstance().isEdt()) {
+                    htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
+                        this, autoplaySrc, autoplayEl);
+                }else {
+                    final HTMLComponent that = this;
+                    final HTMLElement playEl = autoplayEl;
+                    Display.getInstance().callSerially(new Runnable() {
+                        public void run() {
+                            htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
+                            that, autoplaySrc, playEl);
+                        }
+                    });
+                }
+                
+            }
+        }
     }
 
 
@@ -3295,7 +3336,12 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                        curTable.startSegment(HTMLTableModel.SEGMENT_TFOOT);
                    }
                    break;
-
+               case HTMLElement.TAG_AUDIO:
+                   if(mediaTags == null) {
+                       mediaTags = new Vector();
+                   }
+                   mediaTags.addElement(child);
+                   break;
             }
 
             if (child.getNumChildren()>0) {

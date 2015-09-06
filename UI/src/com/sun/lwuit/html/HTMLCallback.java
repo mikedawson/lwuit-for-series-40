@@ -155,6 +155,16 @@ public interface HTMLCallback extends ParserCallback,CSSParserCallback {
     public static int LINK_FORBIDDEN = 2;
 
 
+    public static int MEDIA_AUDIO = 1;
+    
+    public static int MEDIA_VIDEO = 2;
+    
+    public static int MEDIA_PLAY = 5;
+    
+    public static int MEDIA_PAUSE = 6;
+    
+    public static int MEDIA_STOP = 7;
+    
     //////////////////////////////////
     // Interface methods            //
     //////////////////////////////////
@@ -284,4 +294,16 @@ public interface HTMLCallback extends ParserCallback,CSSParserCallback {
      */
     public void dataChanged(int type, int index, HTMLComponent htmlC, TextField textField, HTMLElement element);
 
+    /**
+     * Called when an media element (e.g. audio or video tag) is selected
+     * 
+     * @param type AUDIO or VIDEO
+     * @param op - play, pause, stop
+     * @param htmlC
+     * @param src
+     * @param mediaElement 
+     */
+    public void mediaPlayRequested(int type, int op, HTMLComponent htmlC, String src, HTMLElement mediaElement);
+    
+    
 }

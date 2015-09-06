@@ -123,5 +123,12 @@ public class DefaultHTMLCallback implements HTMLCallback {
     public void dataChanged(int type, int index, HTMLComponent htmlC, TextField textField, HTMLElement element) {
         // do nothing
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void mediaPlayRequested(int type, int op, HTMLComponent htmlC, String src, HTMLElement mediaElement) {
+        //do nothing
+    }
 
 }
