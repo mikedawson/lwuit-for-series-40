@@ -275,6 +275,22 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
      */
     protected int[] imgReservationSpace = null;
     
+    /**
+     * Indicate that the images should be constrained to fit within the available
+     * component width
+     */
+    public static final int IMG_CONSTRAIN_WIDTH = 1;
+    
+    /**
+     * Indicate that the images should be constrained to fit within the avialable
+     */
+    public static final int IMG_CONSTRAIN_HEIGHT = 2;
+    
+    /**
+     * The image constraint policy for this HTML component
+     */
+    protected int imgConstraints = 0;
+    
     // Document colors
     private int bgColor=DEFAULT_BGCOLOR;
     private int textColor=DEFAULT_TEXT_COLOR;
@@ -656,6 +672,33 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
         if (SUPPORT_CSS) { // If not supporting CSS, the loadCSS flag is locked on false
             loadCSS=!ignore;
         }
+    }
+    
+    /**
+     * A lightweight alternative to CSS and 'Responsive' design: allow constraining
+     * images to the available width and/or height of the screen.  When set
+     * images will be resized in proportion to fit the width and/or height.
+     * 
+     * @param constraints A bitmask flag that can include IMG_CONSTRAIN_WIDTH
+     * and IMG_CONSTRAIN_HEIGHT e.g. IMG_CONSTRAIN_WIDTH | IMG_CONSTRAIN_HEIGHT
+     * to constrain both.
+     * 
+     * @see HTMLComponent#IMG_CONSTRAIN_WIDTH
+     * @see HTMLComponent#IMG_CONSTRAIN_HEIGHT
+     */
+    public void setImageConstrainPolicy(int constraints) {
+        this.imgConstraints = constraints;
+    }
+    
+    /**
+     * Get the current image constraint policy
+     * 
+     * @see HTMLComponent#setImageConstrainPolicy(int) 
+     * 
+     * @return The current image constraint policy
+     */
+    public int getImageConstrainPolicy() {
+        return this.imgConstraints;
     }
 
     /**
