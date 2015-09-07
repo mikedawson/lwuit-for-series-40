@@ -290,6 +290,7 @@ class ResourceThreadQueue {
         if (threadCount==0) {
             if (images.size()==0) {
                 htmlC.setPageStatus(HTMLCallback.STATUS_COMPLETED);
+                htmlC.checkAutoplay();
             } else {
                 startRunningImages();
             }
