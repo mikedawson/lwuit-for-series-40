@@ -1174,7 +1174,6 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
                         if (threadQueue.getCSSCount()==-1) {
                             displayPage();
-                            checkAutoplay();
                         }
                         //if ( ((!showImages) || (threadQueue.getQueueSize()==0)) {
                         if (threadQueue.getQueueSize()==0) {
