@@ -159,12 +159,14 @@ public class HTMLElement extends Element {
  public static final int TAG_AUDIO = 81;
  public static final int TAG_VIDEO = 82;
  
+ public static final int TAG_SOURCE = 83;
+ 
  //Text nodes (not an actual tag - text segments are added by the parser as the 'text' tag
- public static final int TAG_TEXT = 83;
+ public static final int TAG_TEXT = 84;
  
  
 
- private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_VIDEO; // In any case we exclude TAG_TEXT, which is given only on text element creation
+ private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_SOURCE ;// In any case we exclude TAG_TEXT, which is given only on text element creation
 
 
 /**
@@ -187,7 +189,7 @@ static final String[] TAG_NAMES = {
     ,"u","font","del","ins","tt","basefont","menu","s","strike","center","dir","map","area","legend","sub","sup","noscript","noframes"
     ,"thead","tbody","tfoot",
     //media elements
-    "audio","video"
+    "audio","video", "source"
     ,"text"
 };
 
@@ -625,7 +627,11 @@ static final String[] TAG_NAMES = {
          ATTR_SRC,
          ATTR_CONTROLS
      },//TAG_VIDEO = 82
-     {} //TEXT = 83;
+     {
+         ATTR_SRC,
+         ATTR_TYPE
+     },//TAG_SOURCE = 83
+     {} //TEXT = 84;
      
  };
 
