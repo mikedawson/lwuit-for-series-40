@@ -411,8 +411,6 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     private int maxSuperscript; // keeps track of teh maximal superscript value of the current line
     Hashtable counters; // CSS content counters
     
-    //Audio and Video tags
-    private Vector mediaTags;
 
     private Vector containers=new Vector();
     //private Vector elementsWithStyleAttr=new Vector();
@@ -1204,10 +1202,11 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     }
     
     void checkAutoplay() {
-        if(mediaTags != null && mediaTags.size() > 0) {
+        Vector audioTags = document.getDescendantsByTagId(HTMLElement.TAG_AUDIO);
+        if(audioTags != null && audioTags.size() > 0) {
             HTMLElement autoplayEl = null;//we only handle one autoplay
-            for(int i = 0; i < mediaTags.size(); i++) {
-                HTMLElement mediaEl = (HTMLElement)mediaTags.elementAt(i);
+            for(int i = 0; i < audioTags.size(); i++) {
+                HTMLElement mediaEl = (HTMLElement)audioTags.elementAt(i);
                 String autoplayAttr = mediaEl.getAttributeById(
                         HTMLElement.ATTR_AUTOPLAY);
                 if(autoplayAttr != null && autoplayAttr.equalsIgnoreCase("autoplay")) {
@@ -3337,10 +3336,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    }
                    break;
                case HTMLElement.TAG_AUDIO:
-                   if(mediaTags == null) {
-                       mediaTags = new Vector();
-                   }
-                   mediaTags.addElement(child);
+                   //TODO: check if we need to show controls
                    break;
             }
 
