@@ -231,7 +231,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
       * Also there's no point setting this to true in this release as it will not lead to actual CSS, but just prepare containers for it.
       */
     boolean loadCSS = SUPPORT_CSS;
-
+    
     /**
      * If true than all active controls will be added event listeners and dispatch them via HTMLCallback
      * Default is false in order not to add overhead when this feature is not needed
@@ -2472,10 +2472,8 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                         
                     }
 
-                    if (loadCSS) {
-                        imgElement.setAssociatedComponents(imgCont);
-                    }
-
+                    imgElement.setAssociatedComponents(imgCont);
+                    
             }
     }
 
@@ -2966,9 +2964,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                             comps=showText(text, curAlign);
                           }
                       }
-                      if (loadCSS) {
-                          child.setAssociatedComponents(comps);
-                      }
+                      child.setAssociatedComponents(comps);
                       //textTime+=(System.currentTimeMillis()-startTextTime); //debug code for performance measurement
                     }
                     break;
