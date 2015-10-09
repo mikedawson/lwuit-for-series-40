@@ -3014,7 +3014,11 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                     break;
                 case HTMLElement.TAG_DIV:
                 case HTMLElement.TAG_CENTER: // CENTER is practically DIV align=CENTER
-                    curAlign=child.getTagId()==HTMLElement.TAG_DIV?getHorizAlign(child.getAttributeById(HTMLElement.ATTR_ALIGN),align,true):Component.CENTER;
+                case HTMLElement.TAG_ARTICLE:
+                case HTMLElement.TAG_SECTION:
+                    curAlign=child.getTagId() != HTMLElement.TAG_CENTER ? 
+                            getHorizAlign(child.getAttributeById(HTMLElement.ATTR_ALIGN),align,true)
+                            :Component.CENTER;
                     adjustAlignment(align, curAlign);
                     newLineIfNotEmpty(curAlign);
                     pushContainer(child);

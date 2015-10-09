@@ -158,15 +158,18 @@ public class HTMLElement extends Element {
  //Media tags (not really HTML4 - but can be dealt with
  public static final int TAG_AUDIO = 81;
  public static final int TAG_VIDEO = 82;
- 
  public static final int TAG_SOURCE = 83;
  
+ //HTML5 tags that are really just like DIV
+ public static final int TAG_SECTION = 84;
+ public static final int TAG_ARTICLE = 85;
+ 
  //Text nodes (not an actual tag - text segments are added by the parser as the 'text' tag
- public static final int TAG_TEXT = 84;
+ public static final int TAG_TEXT = 86;
  
  
 
- private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_SOURCE ;// In any case we exclude TAG_TEXT, which is given only on text element creation
+ private static int LAST_TAG_INDEX = HTMLComponent.PROCESS_HTML_MP1_ONLY?TAG_FIELDSET:TAG_ARTICLE ;// In any case we exclude TAG_TEXT, which is given only on text element creation
 
 
 /**
@@ -189,7 +192,9 @@ static final String[] TAG_NAMES = {
     ,"u","font","del","ins","tt","basefont","menu","s","strike","center","dir","map","area","legend","sub","sup","noscript","noframes"
     ,"thead","tbody","tfoot",
     //media elements
-    "audio","video", "source"
+    "audio","video", "source",
+    //HTML5 div like elements
+    "section", "article"
     ,"text"
 };
 
@@ -631,7 +636,9 @@ static final String[] TAG_NAMES = {
          ATTR_SRC,
          ATTR_TYPE
      },//TAG_SOURCE = 83
-     {} //TEXT = 84;
+     {},//TAG_SECTION = 84
+     {},//TAG_ARTICLE = 85
+     {} //TEXT = 86;
      
  };
 
