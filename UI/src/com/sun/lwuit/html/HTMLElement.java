@@ -406,7 +406,7 @@ static final String[] TAG_NAMES = {
         ATTR_ACTION, // URL
         ATTR_ENCTYPE, // cdata
         ATTR_METHOD, // get | post
-
+        ATTR_NAME // name for identification 
      }, // FORM = 35;
      {
         ATTR_ACCESSKEY, // character
@@ -1565,7 +1565,7 @@ static int getColor(String colorStr,int defaultColor) {
     }
 
     /**
-     *  Returns all descendants with the specified tag id
+     * Returns all descendants with the specified tag id
      *
      * @param tagId The tag ID to look for, one of the TAG_* constants (Not to be confused with the id attribute)
      * @param depth The search depth (1 - children, 2 - grandchildren .... DEPTH_INFINITE - for all descendants)
@@ -1582,7 +1582,7 @@ static int getColor(String colorStr,int defaultColor) {
         getDescendantsByTagIdInternal(v, tagId,depth);
         return v;
     }
-
+    
     /**
      *  Returns all descendants with the specified tag id
      *
@@ -1592,6 +1592,109 @@ static int getColor(String colorStr,int defaultColor) {
     public Vector getDescendantsByTagId(int tagId) {
         return getDescendantsByTagId(tagId, DEPTH_INFINITE);
     }
+    
+    /**
+     * Return all descendants with the specified css class 
+     * 
+     * e.g. to find DIV and P elements with the class classyblocks:
+     * 
+     * getDescendantsByClass("classyblocks", new int[] { TAG_P, TAG_DIV, DEPTH_INFINITE);
+     * 
+     * @param cls The css class to look for
+     * @param tagTypes array of integers of permissible tag types or null to allow all tag types
+     * @param depth Maximum depth of recursion
+     * @return 
+     */
+    public Vector getDescendantsByClass(String cls, int[] tagTypes, int depth) {
+        if(getChildren() == null) {
+            return null;
+        }
+        
+        Vector v = new Vector();
+        getDescendantsByClassInternal(v,tagTypes, cls, depth);
+        return v;
+    }
+    
+    /**
+     * Return all descendants with the specified css class 
+     * 
+     * e.g. to find DIV and P elements with the class classyblocks:
+     * 
+     * getDescendantsByClass("classyblocks", new int[] { TAG_P, TAG_DIV);
+     * 
+     * @param cls The css class to look for
+     * @param tagTypes array of integers of permissible tag types or null to allow all tag types
+     * @return 
+     */
+    public Vector getDescendantsByClass(String cls, int[] tagTypes) {
+        return getDescendantsByClass(cls, tagTypes, DEPTH_INFINITE);
+    }
+    
+    private void getDescendantsByClassInternal(Vector v, int[] tagTypes, String cls, int depth) {
+        int i = 0;
+        Vector children = getChildren();
+        
+        HTMLElement child;
+        if(children != null) {
+            for(i = 0; i < children.size(); i++) {
+                child = (HTMLElement)children.elementAt(i);
+                if(depth > 0) {
+                    child.getDescendantsByClassInternal(v, tagTypes, cls, depth-1);
+                }
+                
+                if((tagTypes == null || child.isTagIdIn(tagTypes)) && child.hasClass(cls)) {
+                    v.addElement(child);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if this element has the given CSS class
+     * 
+     * @param cls CSS class to look for
+     * 
+     * @return true if this element has the given css class, false otherwise
+     */
+    public boolean hasClass(String cls) {
+        String clsAttr = getAttributeById(HTMLElement.ATTR_CLASS);
+        if(clsAttr == null) {
+            return false;
+        }
+        
+        int foundIndex;
+        int startPos = 0;
+        int clsAttrEnd;
+        while((foundIndex = clsAttr.indexOf(cls, startPos)) != -1) {
+            clsAttrEnd = foundIndex + cls.length();
+            //avoid matching a substring - check both the start and end
+            if((foundIndex == 0 || CSSParser.isWhiteSpace(clsAttr.charAt(foundIndex-1))) && (clsAttrEnd == clsAttr.length() || CSSParser.isWhiteSpace(clsAttr.charAt(clsAttrEnd)))) {
+                return true;
+            }
+            startPos = clsAttrEnd;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check to see whether or not this element is one of a given array of tag IDs
+     * 
+     * @param tagIds
+     * 
+     * @return true if the id of this tag is in the array, false otherwise
+     */
+    public boolean isTagIdIn(int[] tagIds) {
+        for(int i = 0; i < tagIds.length; i++) {
+            if(tagIds[i] == id) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+
 
     /**
      * Returns true if this element is the first non-text child of its parent
