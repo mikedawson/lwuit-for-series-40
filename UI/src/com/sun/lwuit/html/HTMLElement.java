@@ -1447,6 +1447,42 @@ static int getColor(String colorStr,int defaultColor) {
         return toString("");
     }
 
+    /**
+     * Get the text content of this node and all it's children
+     * 
+     * @param depthLimit Limit on how deep to descend through the child nodes
+     * 
+     * @return String of all text nodes concatenated together in the order in which they occur
+     */
+    public String toText(int depthLimit) {
+        StringBuffer sb = new StringBuffer();
+        toTextInternal(sb, DEPTH_INFINITE);
+        return sb.toString();
+    }
+    
+    /**
+     * Get the text content of this node and all it's children
+     *  
+     * @return String of all text nodes concatenated together in the order in which they occur
+     */
+    public String toText() {
+        return toText(DEPTH_INFINITE);
+    }
+    
+    protected void toTextInternal(StringBuffer sb, int depth) {
+        if(isTextElement()) {
+            sb.append(getText());
+        }else {
+            Vector children = getChildren();
+            if(children != null && depth > 0) {
+                for(int i = 0; i < children.size(); i++) {
+                    ((HTMLElement)children.elementAt(i)).toTextInternal(sb, depth-1);
+                }
+            }
+        }
+        
+    }
+    
     
     /**
      * Returns the attribute name of the requested attribute
