@@ -1154,7 +1154,9 @@ static int getColor(String colorStr,int defaultColor) {
             }
         }
 
-        if (attrId==-1) {
+        if(attribute.startsWith("data-")) {
+            setAttribute((Object)attribute, value);
+        }else if (attrId==-1) {
             return HTMLCallback.ERROR_ATTRIBUTE_NOT_SUPPORTED;
 
         } else {
@@ -1463,6 +1465,10 @@ static int getColor(String colorStr,int defaultColor) {
                 if (name.equalsIgnoreCase(ATTRIBUTE_NAMES[i])) {
                     return getAttributeById(i);
                 }
+            }
+            
+            if(name.startsWith("data-") && attributes.containsKey(name)) {
+                return (String)attributes.get(name);
             }
         }
         return null;
