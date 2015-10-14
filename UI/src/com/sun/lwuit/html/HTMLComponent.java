@@ -381,7 +381,9 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     private boolean optionSelected; //true if the current option is marked as selected (i.e. the default selection)
     private String optionValue; // The current option value
     private Hashtable textfieldsToForms; // A hashtable that maps all input fields to their corresponding forms
-
+    private boolean formAddSubmitBtn = true; //Whether or not to add a submit button if one is not found
+    
+    
     // Lists
     private int ulLevel; //Unordered list level (Used to display the right bullet)
     private int olIndex; //Index of the current item in the list
@@ -700,6 +702,26 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
      */
     public int getImageConstrainPolicy() {
         return this.imgConstraints;
+    }
+    
+    /**
+     * Some forms that might rely on Javascript will be missing a submit button
+     * By default a submit button is added.  
+     * 
+     * @param autoAddSubmitBtn Whether or not to automatically add a submit button to forms that don't have one (true by default)
+     */
+    public void setAutoAddSubmitButton(boolean autoAddSubmitBtn) {
+        this.formAddSubmitBtn = autoAddSubmitBtn;
+    }
+    
+    /**
+     * Some forms that might rely on Javascript will be missing a submit button
+     * By default a submit button is added.  
+     * 
+     * @return Whether or not to automatically add a submit button to forms that don't have one (true by default)
+     */
+    public boolean isAutoAddSubmitButton() {
+        return this.formAddSubmitBtn;
     }
 
     /**
@@ -3461,7 +3483,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                     font=oldFont;
                     break;
                 case HTMLElement.TAG_FORM:
-                    if ((curForm!=null) && (!curForm.hasSubmitButton) && (curForm.getNumFields()>0)) { // This is a fix for forms with no submit buttons which can be resulted due to the fact XHTML-MP doesn't support the BUTTON tag and also input type button with javascript
+                    if (formAddSubmitBtn && (curForm!=null) && (!curForm.hasSubmitButton) && (curForm.getNumFields()>0)) { // This is a fix for forms with no submit buttons which can be resulted due to the fact XHTML-MP doesn't support the BUTTON tag and also input type button with javascript
                         Button submitButton=new Button(curForm.createSubmitCommand(null,null));
                         addCmp(submitButton,curAlign);
                     }
