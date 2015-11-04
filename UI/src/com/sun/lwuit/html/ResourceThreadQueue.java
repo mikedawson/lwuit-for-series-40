@@ -463,7 +463,7 @@ class ResourceThreadQueue {
                         img=Image.createImage(is);
                         if (img==null) {
                             if (htmlC.getHTMLCallback()!=null) {
-                                htmlC.getHTMLCallback().parsingError(HTMLCallback.ERROR_IMAGE_BAD_FORMAT, null, null, null, "Image could not be created from "+imageUrl);
+                                htmlC.getHTMLCallback().parsingError(HTMLCallback.ERROR_IMAGE_BAD_FORMAT, null, null, null, "Image could not be created from "+imageUrl + " :null result");
                             }
                         }
                     }
@@ -489,7 +489,7 @@ class ResourceThreadQueue {
                 }
             } catch (IOException ioe) {
                 if (htmlC.getHTMLCallback()!=null) {
-                    htmlC.getHTMLCallback().parsingError(HTMLCallback.ERROR_IMAGE_BAD_FORMAT, null, null, null, "Image could not be created from "+imageUrl+": "+ioe.getMessage());
+                    htmlC.getHTMLCallback().parsingError(HTMLCallback.ERROR_IMAGE_BAD_FORMAT, null, null, null, "Image could not be created from "+imageUrl+" IOException: "+ioe.getMessage());
                 }
                 if(!cancelled) {
                     threadQueue.threadFinished(this,false);
