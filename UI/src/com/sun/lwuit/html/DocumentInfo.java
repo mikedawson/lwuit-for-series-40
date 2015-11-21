@@ -56,6 +56,16 @@ public class DocumentInfo {
      * Indicates that the request is for a CSS file
      */
     public static int TYPE_CSS = 2;
+    
+    /**
+     * Indicates that the request is for an audio file
+     */
+    public static int TYPE_AUDIO = 3;
+    
+    /**
+     * Indicates that the request is for a video file
+     */
+    public static int TYPE_VIDEO = 4;
 
 
     private String pageURL;

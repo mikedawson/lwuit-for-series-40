@@ -23,6 +23,7 @@
  */
 package com.sun.lwuit.html;
 
+import com.sun.lwuit.mediaplayer.LWUITMediaPlayer;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.CheckBox;
 import com.sun.lwuit.ComboBox;
@@ -47,6 +48,9 @@ import com.sun.lwuit.impl.LWUITImplementation;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
+import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
+import com.sun.lwuit.mediaplayer.MediaPlayerComp;
+import com.sun.lwuit.mediaplayer.MediaPlayerFactory;
 import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
@@ -418,7 +422,10 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
     //private Vector elementsWithStyleAttr=new Vector();
     Vector marqueeComponents = new Vector();
     private Motion marqueeMotion;
-
+    
+    //Whether or not the media playback of audio and video tags is enabled
+    private boolean mediaPlayerEnabled = false;
+    
     /**
      * This static segment sets up the INPUT_TYPES vector with values from INPUT_TYPE_STRINGS.
      * This is used later on for lookup.
@@ -638,7 +645,20 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
         return htmlCallback;
     }
 
-
+    
+    /**
+     * Set whether or not audio and video tags are to be enabled: if true
+     * then 
+     * 
+     */
+    public void setMediaPlayerEnabled(boolean mediaPlayerEnabled) {
+        this.mediaPlayerEnabled = mediaPlayerEnabled;
+    }
+    
+    public boolean isMediaPlayerEnabled() {
+        return this.mediaPlayerEnabled;
+    }
+    
     /**
      * Sets the default font for this HTMLComponent
      * 
@@ -3359,6 +3379,16 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    break;
                case HTMLElement.TAG_AUDIO:
                    //TODO: check if we need to show controls
+                   if(mediaPlayerEnabled && child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null) {
+                       HTMLMediaInputProvider provider = new HTMLMediaInputProvider(
+                           this, child);
+                       MediaPlayerComp mPlayer = new MediaPlayerComp(
+                            DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
+                            provider, htmlCallback);
+                       curLine.addComponent(mPlayer);
+                       child.setAssociatedComponents(mPlayer);
+                   }
+                   
                    break;
             }
 
