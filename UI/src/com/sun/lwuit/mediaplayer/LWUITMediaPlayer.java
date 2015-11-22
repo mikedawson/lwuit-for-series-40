@@ -29,11 +29,11 @@ public interface LWUITMediaPlayer {
     
     public void startPlayer(String id) throws Exception;
     
-    public void stopPlayer(String id) throws Exception;
+    public int stopPlayer(String id) throws Exception;
     
     public void pausePlayer(String id) throws Exception;
     
-    public void stopAllPlayers() throws Exception;
+    public String stopAllPlayers();
     
     public void addMediaPlayerListener(String id, MediaPlayerListener listener);
     

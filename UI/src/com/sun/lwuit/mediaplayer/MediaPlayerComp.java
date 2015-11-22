@@ -95,31 +95,46 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     // can be the id attribute if present from html or generated playerID
     private String playerID = null;
     
+    private boolean controlsEnabled = true;
+    
     /**
      * Make a new MediaPlayerComponent 
      * 
      * @param mediaPlayer The underlying media player implementation to take control of playing the actual media
      * @param provider MediaPlayerInputProvider that will give us the required stream
      * @param callback Optional HTMLCallback that can be used to reporting back using the parseError method (can be null)
+     * @param controlsEnabled True to enable play/pause/stop buttons false otherwise
      */
-    public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback) {
+    public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled) {
         this.mediaPlayer = mediaPlayer;
         this.callback = callback;
         this.provider = provider;
+        this.controlsEnabled = controlsEnabled;
         
         setLayout(new BoxLayout(BoxLayout.X_AXIS));
         
-        playPauseButton = new MediaButton(PLAY);
-        playPauseButton.addActionListener(this);
-        stopButton = new MediaButton(STOP);
-        stopButton.addActionListener(this);
-        
-        addComponent(playPauseButton);
-        addComponent(stopButton);
+        if(controlsEnabled) {
+             playPauseButton = new MediaButton(PLAY);
+            playPauseButton.addActionListener(this);
+            stopButton = new MediaButton(STOP);
+            stopButton.addActionListener(this);
+
+            addComponent(playPauseButton);
+            addComponent(stopButton);
+        }
+       
         
         state = UNREALIZED;
         
         playerID = "mplayer" + getNextAutoID();
+    }
+    
+    public void setControlsEnabled(boolean controlsEnabled) {
+        this.controlsEnabled = controlsEnabled;
+    }
+    
+    public boolean isControlsEnabled() {
+        return this.controlsEnabled;
     }
     
     public static int getNextAutoID() {
@@ -167,7 +182,9 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     
     public void stop() {
         try {
-            mediaPlayer.stopPlayer(playerID);
+            int result = mediaPlayer.stopPlayer(playerID);
+            callback.parsingError(104, "MediaPlayerComp", "stopOK", ""+result, 
+                null);
         }catch(Exception e) {
             if(callback != null) {
                 callback.parsingError(104, "MediaPlayerComp", "stop", null, 
@@ -178,15 +195,19 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         if(in != null) {
             try {
                 in.close();
-                in = null;
             }catch(IOException e) {
                 callback.parsingError(105, "MediaPlayerComp", "stop-close", null, 
                     e.getMessage() + ": " + e.toString());
+            }finally {
+                in = null;
             }
         }
+        
+        state = UNREALIZED;
     }
 
     public void playerUpdate(LWUITMediaPlayer player, String id, String event, Object objectData) {
+        callback.parsingError(105, "MediaPlayerComp", "playerUpdate", id, event);
         if(id.equals(playerID)) {
             if(event.equals(MediaPlayerListener.END_OF_MEDIA)) {
                 stop();
@@ -200,12 +221,17 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             
             try {
                 comp.in = comp.provider.getMediaInputStream();
+                comp.callback.parsingError(101, "RealizePlayerThread", 
+                        "addPlayerListener", null, " : comp.in=" + comp.in + " comp.mediaPlayer =" + comp.mediaPlayer);
                 comp.mediaPlayer.addMediaPlayerListener(comp.playerID, comp);
+                comp.callback.parsingError(101, "RealizePlayerThread", 
+                        "startPlaying", null, " : comp.in=" + comp.in + " playerID=" + comp.playerID);
                 comp.startPlaying();
             }catch(Exception e) {
                 if(comp.callback != null) {
                     comp.callback.parsingError(101, "RealizePlayerThread", 
-                        "inputStream", null, null);
+                        "inputStream1.1", e.toString(), e.getMessage()
+                        +" : comp.in=" + comp.in + " playerID=" + comp.playerID);
                 }
                 comp.stop();
             }

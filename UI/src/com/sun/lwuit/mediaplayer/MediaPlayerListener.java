@@ -16,12 +16,12 @@ public interface MediaPlayerListener {
     /**
      * Event constant indicating that the player has reached the end of the media
      */
-    public static final String END_OF_MEDIA = "END_OF_MEDIA";
+    public static final String END_OF_MEDIA = "endOfMedia";
     
     /**
      * 
      */
-    public static final String STOPPED = "STOPPED";
+    public static final String STOPPED = "stopped";
     
     
     public void playerUpdate(LWUITMediaPlayer player, String id, String event, Object objectData);

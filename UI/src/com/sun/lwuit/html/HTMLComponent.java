@@ -1257,26 +1257,34 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                 }
             }
             
-            
-            
             if(autoplayEl != null && htmlCallback != null) {
                 final String autoplaySrc = convertURL(
                     autoplayEl.getAttributeById(HTMLElement.ATTR_SRC));
                 final int type = HTMLCallback.MEDIA_AUDIO;
+                final MediaPlayerComp mComp = 
+                        (MediaPlayerComp)autoplayEl.getUi().elementAt(0);
+                mComp.play();
+                /*
                 if(Display.getInstance().isEdt()) {
-                    htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
-                        this, autoplaySrc, autoplayEl);
+                    //htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
+                    //    this, autoplaySrc, autoplayEl);
+                    mComp.play();
                 }else {
+                    
                     final HTMLComponent that = this;
                     final HTMLElement playEl = autoplayEl;
+                    
                     Display.getInstance().callSerially(new Runnable() {
                         public void run() {
-                            htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
-                            that, autoplaySrc, playEl);
+                            //htmlCallback.mediaPlayRequested(HTMLCallback.MEDIA_PLAY, type, 
+                            //that, autoplaySrc, playEl);
+                            mComp.play();
                         }
                     });
+                    
+                    
                 }
-                
+                */
             }
         }
     }
@@ -3379,12 +3387,14 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    break;
                case HTMLElement.TAG_AUDIO:
                    //TODO: check if we need to show controls
-                   if(mediaPlayerEnabled && child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null) {
+                   if(mediaPlayerEnabled) {
+                       boolean controlsEnabled = 
+                           child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null;
                        HTMLMediaInputProvider provider = new HTMLMediaInputProvider(
                            this, child);
                        MediaPlayerComp mPlayer = new MediaPlayerComp(
                             DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
-                            provider, htmlCallback);
+                            provider, htmlCallback, controlsEnabled);
                        curLine.addComponent(mPlayer);
                        child.setAssociatedComponents(mPlayer);
                    }
