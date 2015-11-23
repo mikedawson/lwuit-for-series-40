@@ -35,6 +35,7 @@ import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.layouts.BoxLayout;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 
 /**
  * This component is intended to produce an all in one MediaPlayer for
@@ -118,6 +119,13 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     
     private boolean controlsEnabled = true;
     
+    private static Hashtable mimeTypes = new Hashtable();
+    
+    static {
+        mimeTypes.put(".mp3", "audio/mpeg");
+        mimeTypes.put(".wav", "audio/x-wav");
+    }
+    
     /**
      * Make a new MediaPlayerComponent 
      * 
@@ -148,6 +156,33 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         state = UNREALIZED;
         
         playerID = "mplayer" + getNextAutoID();
+    }
+    
+    /**
+     * Get the mime type likely for this media extension type
+     * 
+     * @param extension Extension with the . - e.g. .mp3
+     * 
+     * @return The known mime type if in the list or application/octet-stream if not known
+     */
+    public static String getMimeTypeByExtension(String extension) {
+        Object val = mimeTypes.get(extension.toLowerCase());
+        if(val != null) {
+            return (String)val;
+        }else {
+            return "application/octet-stream";
+        }
+    }
+    
+    /**
+     * Register a file extension so that it gets returned when getMimeTypeByExtension
+     * is used
+     * 
+     * @param extension The full extension in lower case with . - e.g. .mp3
+     * @param mimeType The mime type e.g. audio/mpeg
+     */
+    public static void registerMimeExtension(String extension, String mimeType) {
+        mimeTypes.put(extension.toLowerCase(), mimeType);
     }
     
     public void setControlsEnabled(boolean controlsEnabled) {
