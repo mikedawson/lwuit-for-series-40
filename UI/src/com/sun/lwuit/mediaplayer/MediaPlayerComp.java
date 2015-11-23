@@ -1,6 +1,27 @@
 /*
- * 
+ * Copyright (c) 2015 UstadMobile, Inc. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  UstadMobile designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by UstadMobile in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores
+ * CA 94065 USA or visit www.oracle.com if you need additional information or
+ * have any questions.
  */
+
 package com.sun.lwuit.mediaplayer;
 
 import com.sun.lwuit.Button;
@@ -151,6 +172,9 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             case PLAY:
                 play();
                 break;
+            case STOP:
+                stop();
+                break;
         }
     }
     
@@ -158,7 +182,38 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         if(state == UNREALIZED) {
             realizeThread = new RealizePlayerThread();
             state = LOADING;
+            setPlayButtonCommand(PAUSE);
             realizeThread.start();
+        }else if(state == PLAY) {
+            //time to pause
+            try {
+                mediaPlayer.pausePlayer(playerID);
+                
+            }catch(Exception e) {
+                if(callback != null) {
+                    callback.parsingError(103, "MediaPlayerComp", "pausePlayer", 
+                        null, e.getMessage() + ": " + e.toString());
+                }
+            }
+            setPlayButtonCommand(PLAY);
+            state = PAUSE;
+        }else if(state == PAUSE) {
+            try {
+                mediaPlayer.startPlayer(playerID);
+            }catch(Exception e) {
+                if(callback != null) {
+                    callback.parsingError(103, "MediaPlayerComp", "resumePlayer", 
+                        null, e.getMessage() + ": " + e.toString());
+                }
+            }
+            setPlayButtonCommand(PAUSE);
+            state = PLAY;
+        }
+    }
+    
+    void setPlayButtonCommand(int state) {
+        if(controlsEnabled) {
+            playPauseButton.setMediaCommand(state);
         }
     }
     
@@ -204,6 +259,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         }
         
         state = UNREALIZED;
+        setPlayButtonCommand(PLAY);
     }
 
     public void playerUpdate(LWUITMediaPlayer player, String id, String event, Object objectData) {
@@ -254,6 +310,13 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         }
 
         
+        public void setMediaCommand(int mediaCommand) {
+            if(mediaCommand != this.mediaCommand) {
+                this.mediaCommand = mediaCommand;
+                repaint();
+            }
+        }
+        
         
         public void paint(Graphics g) {
             super.paint(g); 
@@ -281,6 +344,12 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
                 case MediaPlayerComp.STOP:
                     //Draw the stop square
                     g.fillRect(x + padL, y+padT, w - padL - padR, h- padT - padB);
+                    break;
+                case MediaPlayerComp.PAUSE:
+                    //Draw the pause rectangles
+                    int rectW = (w - padL - padR)/3;
+                    g.fillRect(x + padL, y+padT, rectW, h- padT - padB);
+                    g.fillRect(x + padL + (rectW*2), y+padT, rectW, h- padT - padB);
                     break;
             }
             
