@@ -149,9 +149,8 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         playerID = "mplayer" + getNextAutoID();
     }
     
-    public void initComponent() {
-        super.initComponent();
-        if(controlsEnabled) {
+    void setupButtons() {
+        if(controlsEnabled && playPauseButton == null) {
             playPauseButton = new MediaButton(PLAY);
             playPauseButton.addActionListener(this);
             stopButton = new MediaButton(STOP);
@@ -160,6 +159,17 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             addComponent(playPauseButton);
             addComponent(stopButton);
         }
+    }
+    
+    public void initComponent() {
+        super.initComponent();
+        
+        setupButtons();
+    }
+    
+    public Component[] getUIComponents() {
+        setupButtons();
+        return new Component[]{playPauseButton, stopButton};
     }
     
     /**

@@ -23,7 +23,6 @@
  */
 package com.sun.lwuit.html;
 
-import com.sun.lwuit.mediaplayer.LWUITMediaPlayer;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.CheckBox;
 import com.sun.lwuit.ComboBox;
@@ -50,7 +49,6 @@ import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
 import com.sun.lwuit.mediaplayer.MediaPlayerComp;
-import com.sun.lwuit.mediaplayer.MediaPlayerFactory;
 import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
@@ -3367,20 +3365,31 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    break;
                case HTMLElement.TAG_AUDIO:
                    if(mediaPlayerEnabled) {
-                       boolean controlsEnabled = 
+                        boolean controlsEnabled = 
                            child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null;
-                       HTMLMediaInputProvider provider;
-                       if(handler instanceof AsyncDocumentRequestHandler) {
-                           provider = new AsyncHTMLMediaInputProvider(this, child);
-                       }else {
-                           provider = new HTMLMediaInputProvider(this, child);
-                       }
+                        HTMLMediaInputProvider provider;
+                        if(handler instanceof AsyncDocumentRequestHandler) {
+                            provider = new AsyncHTMLMediaInputProvider(this, child);
+                        }else {
+                            provider = new HTMLMediaInputProvider(this, child);
+                        }
                        
-                       MediaPlayerComp mPlayer = new MediaPlayerComp(
+                        MediaPlayerComp mPlayer = new MediaPlayerComp(
                             DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
                             provider, htmlCallback, controlsEnabled);
-                       curLine.addComponent(mPlayer);
-                       child.setAssociatedComponents(mPlayer);
+                        curLine.addComponent(mPlayer);
+                        child.setAssociatedComponents(mPlayer);
+                       
+                        if (eventsListener!=null) {
+                            Component[] cmps = mPlayer.getUIComponents();
+                            for(int j = 0; j < cmps.length; j++) {
+                                eventsListener.registerComponent(cmps[j], child);
+                            }
+                        }
+                        
+                        if(firstFocusable == null && controlsEnabled) {
+                            firstFocusable = mPlayer.getUIComponents()[0];
+                        }
                    }
                    
                    break;
