@@ -3366,12 +3366,16 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    }
                    break;
                case HTMLElement.TAG_AUDIO:
-                   //TODO: check if we need to show controls
                    if(mediaPlayerEnabled) {
                        boolean controlsEnabled = 
                            child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null;
-                       HTMLMediaInputProvider provider = new HTMLMediaInputProvider(
-                           this, child);
+                       HTMLMediaInputProvider provider;
+                       if(handler instanceof AsyncDocumentRequestHandler) {
+                           provider = new AsyncHTMLMediaInputProvider(this, child);
+                       }else {
+                           provider = new HTMLMediaInputProvider(this, child);
+                       }
+                       
                        MediaPlayerComp mPlayer = new MediaPlayerComp(
                             DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
                             provider, htmlCallback, controlsEnabled);

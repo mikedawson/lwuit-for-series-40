@@ -27,35 +27,129 @@ package com.sun.lwuit.mediaplayer;
 import java.io.InputStream;
 
 /**
- *
- * @author mike
+ * This interface represents a class that takes responsibility for playing a
+ * media file.  On J2ME this is done using JSR-135 Player and java media extensions
+ * on the J2SE platform.
+ * 
+ * The class is given an id for each item to play.  Certain implementations may
+ * limit the number of items that can play simultaneously.
+ * 
+ * The flow of use would be:
+ * 
+ * 1. realizePlayer - Given inputstream, the mimetype and a unique id
+ * 2. (optional) addMediaPlayerListener to listen for events
+ * 3. startPlayer to commence playback
+ * 
+ * @author Mike Dawson <mike@ustadmobile.com>
  */
 public interface LWUITMediaPlayer {
     
+    /**
+     * The player has not loaded anything and does not have any resources locked 
+     * at all.  Value is the same as JSR-135 Player
+     */
     public static final int UNREALIZED = 100;
     
+    /**
+     * Player has resources allocated.  Value as per JSR-135 Player.
+     */
     public static final int REALIZED = 200;
     
+    /**
+     * Player has loaded content and is ready to go. Value as per JSR-135 Player.
+     */
     public static final int PREFETCHED = 300;
     
+    /**
+     * Player has started playing Value as per JSR-135 Player.
+     */
     public static final int STARTED = 400;
     
+    /**
+     * Player is closed. Value as per JSR-135 Player.
+     */
     public static final int CLOSED = 0;
     
+    /**
+     * The id mentioned is not active here
+     */
     public static final int INACTIVE = -100;
     
+    /**
+     * Status returned when the stop method stops an active player
+     */
+    public static final int CLOSED_DEALLOCATED_OK = 0;
+    
+    /**
+     * Status returned when the given id has already been paused
+     */
+    public static final int CLOSED_ALEADY = 1;
+    
+    /**
+     * Status returned when the given player has already been stopped and
+     * deallocated
+     */
+    public static final int NOTHING_TO_CLOSE = 1;
+    
+    /**
+     * Realize a player for the given inputstream and mimetype.  It can be referred
+     * to by the given id which must be unique
+     * 
+     * @param in InputStream that provides media to play
+     * @param mimeType Mime type of the content to play e.g. audio/mpeg
+     * @param id An id that will be used to refer to it for future operations, events, etc.
+     * @throws Exception If something goes wrong in the underlying implementation
+     */
     public void realizePlayer(InputStream in, String mimeType, String id) throws Exception;
     
+    /**
+     * Start the media playing
+     * 
+     * @param id as supplied to realizePlayer
+     * @throws Exception if something goes wrong in the underlying implementation
+     */
     public void startPlayer(String id) throws Exception;
     
+    /**
+     * Stops the input stream playing and releases resources (including removing
+     * event listeners).  Will close the inputstream provided to realizePlayer
+     * 
+     * @param id as supplied to realizePlayer
+     * @return status of request to stop
+     * @throws Exception  If something goes wrong in the underlying implementation
+     */
     public int stopPlayer(String id) throws Exception;
     
+    /**
+     * Used temporarily stop playback with the option to continue by calling
+     * startPlayer again (e.g. pauses)
+     * 
+     * @param id as supplied to realizePlayer
+     * @throws Exception  If something goes wrong in the underlying implementation
+     */
     public void pausePlayer(String id) throws Exception;
     
+    /**
+     * Stop all currently active players
+     * 
+     * @return Description of errors encountered as a string.  A blank String "" means everything is OK
+     */
     public String stopAllPlayers();
     
+    /**
+     * Listener for player events (follows the JSR-135 scheme)
+     * 
+     * @param id of player to listen to
+     * @param listener Listener to receive events
+     */
     public void addMediaPlayerListener(String id, MediaPlayerListener listener);
     
+    /**
+     * Gets the current state of the given player
+     * 
+     * @param id as supplied to realizePlayer
+     * @return  State of the given player as per the status constants
+     */
     public int getState(String id);
     
 }

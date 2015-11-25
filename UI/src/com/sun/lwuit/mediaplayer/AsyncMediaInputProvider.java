@@ -21,25 +21,43 @@
  * CA 94065 USA or visit www.oracle.com if you need additional information or
  * have any questions.
  */
+
 package com.sun.lwuit.mediaplayer;
+
+import java.io.InputStream;
 
 /**
  *
+ * Like AsyncDocumentRequest but for media input.  A MediaPlayer can wait for an 
+ * async callback when the Media Input is ready - which should provide an 
+ * inputstream and a mime type.
+ * 
  * @author mike
  */
-public class MediaPlayerFactory {
+public interface AsyncMediaInputProvider extends MediaPlayerInputProvider {
     
-    private static MediaPlayerFactory instance = new MediaPlayerFactory();
+    /**
+     * Like MediaInputPorivder.getMediaInputStream but asynchronous
+     * 
+     * @see MediaPlayerInputProvider#getMediaInputStream() 
+     * 
+     * @param callback The IOCallback interface that will use the media input
+     */
+    public void getMediaInputStreamAsync(IOCallback callback);
     
-    public static MediaPlayerFactory getInstance() {
-        return instance;
-    }
-    
-    
-    public LWUITMediaPlayer createMediaPlayer() {
-        return new MIDPMediaPlayer();
-    }
-    
-    
-    
+    /**
+     * Interface to be implemented by components that want to be able to use
+     * an async source to get a mediainput (e.g. the MediaPlayerComponent)
+     */
+    public interface IOCallback {
+        
+        /**
+         * This method is called when the media input stream is ready
+         * 
+         * @param in InputStream containing media to play
+         * @param mimeType The mime type of the media e.g. audio/mpeg
+         */
+        public void mediaReady(InputStream in, String mimeType);
+        
+    } 
 }

@@ -40,7 +40,7 @@ import java.util.Hashtable;
 /**
  * This component is intended to produce an all in one MediaPlayer for
  * audio or video with play/pause button and stop button (maybe even a progress
- * bar).
+ * bar some day).
  * 
  * This goes together with LWUITMediaPlayer provided by the underlying (e.g. MIDP or 
  * J2SE implementation) that actually plays the files (using the appropriate
@@ -57,7 +57,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public class MediaPlayerComp extends Container implements ActionListener, MediaPlayerListener{
+public class MediaPlayerComp extends Container implements ActionListener, MediaPlayerListener, AsyncMediaInputProvider.IOCallback{
     
     /**
      * The player has not loaded the file yet at all / no resources allocated
@@ -142,8 +142,17 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         
         setLayout(new BoxLayout(BoxLayout.X_AXIS));
         
+        
+        
+        state = UNREALIZED;
+        
+        playerID = "mplayer" + getNextAutoID();
+    }
+    
+    public void initComponent() {
+        super.initComponent();
         if(controlsEnabled) {
-             playPauseButton = new MediaButton(PLAY);
+            playPauseButton = new MediaButton(PLAY);
             playPauseButton.addActionListener(this);
             stopButton = new MediaButton(STOP);
             stopButton.addActionListener(this);
@@ -151,11 +160,15 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             addComponent(playPauseButton);
             addComponent(stopButton);
         }
-       
-        
-        state = UNREALIZED;
-        
-        playerID = "mplayer" + getNextAutoID();
+    }
+    
+    /**
+     * This is really just being abused to provide additional logging
+     */
+    void callbackParsingError(int id, String tag, String attribute, String value, String description) {
+        if(callback != null) {
+            callback.parsingError(id, tag, attribute, value, description);
+        }
     }
     
     /**
@@ -185,10 +198,11 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         mimeTypes.put(extension.toLowerCase(), mimeType);
     }
     
-    public void setControlsEnabled(boolean controlsEnabled) {
-        this.controlsEnabled = controlsEnabled;
-    }
-    
+    /**
+     * Sets whether or not controls are enabled for this player (pause/stop button)
+     * 
+     * @return true if controls are shown; false otherwise
+     */
     public boolean isControlsEnabled() {
         return this.controlsEnabled;
     }
@@ -201,6 +215,8 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     }
 
     public void actionPerformed(ActionEvent evt) {
+        callbackParsingError(150, "MediaPlayerComp", "actionPerformed", ""+state, 
+            "");
         int cmdId = evt.getCommand() != null ? evt.getCommand().getId() : -1;
         
         switch(cmdId) {
@@ -213,22 +229,30 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         }
     }
     
+    /**
+     * Start or continue playing the media
+     */
     public void play() {
+        callbackParsingError(150, "MediaPlayerComp", "startPlaying", ""+state, 
+            "");
         if(state == UNREALIZED) {
-            realizeThread = new RealizePlayerThread();
             state = LOADING;
             setPlayButtonCommand(PAUSE);
-            realizeThread.start();
+            if(provider instanceof AsyncMediaInputProvider) {
+                ((AsyncMediaInputProvider)provider).getMediaInputStreamAsync(this);
+            }else {
+                realizeThread = new RealizePlayerThread();
+                realizeThread.start();
+            }
         }else if(state == PLAY) {
             //time to pause
             try {
                 mediaPlayer.pausePlayer(playerID);
                 
             }catch(Exception e) {
-                if(callback != null) {
-                    callback.parsingError(103, "MediaPlayerComp", "pausePlayer", 
+                callbackParsingError(103, "MediaPlayerComp", "pausePlayer", 
                         null, e.getMessage() + ": " + e.toString());
-                }
+                
             }
             setPlayButtonCommand(PLAY);
             state = PAUSE;
@@ -236,16 +260,19 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             try {
                 mediaPlayer.startPlayer(playerID);
             }catch(Exception e) {
-                if(callback != null) {
-                    callback.parsingError(103, "MediaPlayerComp", "resumePlayer", 
+                callbackParsingError(103, "MediaPlayerComp", "resumePlayer", 
                         null, e.getMessage() + ": " + e.toString());
-                }
+                
             }
             setPlayButtonCommand(PAUSE);
             state = PLAY;
         }
     }
     
+    /**
+     * Used to change the play button between the play and pause states
+     * @param state 
+     */
     void setPlayButtonCommand(int state) {
         if(controlsEnabled) {
             playPauseButton.setMediaCommand(state);
@@ -258,53 +285,50 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             mediaPlayer.startPlayer(playerID);
             state = PLAY;
         }catch(Exception e) {
-            if(callback != null) {
-                callback.parsingError(103, "MediaPlayerComp", "startPlaying", null, 
+            callbackParsingError(103, "MediaPlayerComp", "startPlaying", null, 
                     e.getMessage() + ": " + e.toString());
-            }
             stop();
         }
     }
     
-    public void pause() {
+    public void mediaReady(InputStream in, String mimeType) {
+        this.in = in;
+        callbackParsingError(101, "RealizePlayerThread", 
+                "mediaReady", null, " : comp.in=" + in + 
+                " comp.mediaPlayer =" + mediaPlayer);
         
+        mediaPlayer.addMediaPlayerListener(playerID, this);
+        startPlaying();
     }
     
     public void stop() {
         try {
             int result = mediaPlayer.stopPlayer(playerID);
-            callback.parsingError(104, "MediaPlayerComp", "stopOK", ""+result, 
+            callbackParsingError(104, "MediaPlayerComp", "stopOK", ""+result, 
                 null);
         }catch(Exception e) {
-            if(callback != null) {
-                callback.parsingError(104, "MediaPlayerComp", "stop", null, 
+            callbackParsingError(104, "MediaPlayerComp", "stop", null, 
                 e.getMessage() + ": " + e.toString());
-            }
-        }
-        
-        if(in != null) {
-            try {
-                in.close();
-            }catch(IOException e) {
-                callback.parsingError(105, "MediaPlayerComp", "stop-close", null, 
-                    e.getMessage() + ": " + e.toString());
-            }finally {
-                in = null;
-            }
         }
         
         state = UNREALIZED;
+        System.gc();
         setPlayButtonCommand(PLAY);
+        callbackParsingError(104, "MediaPlayerComp", "closeSetPlayButton:" + in, "", 
+                null);
     }
 
     public void playerUpdate(LWUITMediaPlayer player, String id, String event, Object objectData) {
-        callback.parsingError(105, "MediaPlayerComp", "playerUpdate", id, event);
+        callbackParsingError(105, "MediaPlayerComp", "playerUpdate", id, 
+            event + ":" + objectData);
         if(id.equals(playerID)) {
             if(event.equals(MediaPlayerListener.END_OF_MEDIA)) {
                 stop();
             }
         }
     }
+
+    
     
     class RealizePlayerThread extends Thread {
         public void run() {
@@ -312,15 +336,15 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             
             try {
                 comp.in = comp.provider.getMediaInputStream();
-                comp.callback.parsingError(101, "RealizePlayerThread", 
+                comp.callbackParsingError(101, "RealizePlayerThread", 
                         "addPlayerListener", null, " : comp.in=" + comp.in + " comp.mediaPlayer =" + comp.mediaPlayer);
                 comp.mediaPlayer.addMediaPlayerListener(comp.playerID, comp);
-                comp.callback.parsingError(101, "RealizePlayerThread", 
+                comp.callbackParsingError(101, "RealizePlayerThread", 
                         "startPlaying", null, " : comp.in=" + comp.in + " playerID=" + comp.playerID);
                 comp.startPlaying();
             }catch(Exception e) {
                 if(comp.callback != null) {
-                    comp.callback.parsingError(101, "RealizePlayerThread", 
+                    comp.callbackParsingError(101, "RealizePlayerThread", 
                         "inputStream1.1", e.toString(), e.getMessage()
                         +" : comp.in=" + comp.in + " playerID=" + comp.playerID);
                 }

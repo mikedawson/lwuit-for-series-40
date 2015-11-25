@@ -25,7 +25,8 @@
 package com.sun.lwuit.mediaplayer;
 
 /**
- *
+ * Manages access to a singleton LWUITMediaPlayer 
+ * 
  * @author mike
  */
 public class DefaultLWUITMediaPlayerManager implements LWUITMediaPlayerManager{

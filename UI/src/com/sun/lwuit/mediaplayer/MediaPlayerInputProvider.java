@@ -29,6 +29,11 @@ import java.io.InputStream;
 
 /**
  *
+ * This interface is used by whatever class can generate a inputstream and 
+ * a mime type that is used to play media; e.g. the HTMLMediaInputProvider
+ * which uses the media html tags and it's DocumentRequestHandler to produce
+ * an input stream and determine the mime type of the media to be played
+ * 
  * @author mike
  */
 public interface MediaPlayerInputProvider {
@@ -42,6 +47,11 @@ public interface MediaPlayerInputProvider {
      */
     public InputStream getMediaInputStream() throws IOException;
     
+    /**
+     * Must provide the mime type of the audio or video to be played
+     * 
+     * @return Mime type as string e.g. audio/mpeg
+     */
     public String getMimeType();
     
 }

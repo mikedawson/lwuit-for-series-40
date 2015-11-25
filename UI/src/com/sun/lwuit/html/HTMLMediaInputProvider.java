@@ -11,11 +11,11 @@ import java.io.InputStream;
  */
 public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
 
-    private HTMLComponent htmlC;
-    private HTMLElement mediaEl;
+    protected HTMLComponent htmlC;
+    protected HTMLElement mediaEl;
     
-    private String mediaURI;
-    private String mimeType;
+    protected String mediaURI;
+    protected String mimeType;
     
     public HTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl) {
         this.htmlC = htmlC;
@@ -61,16 +61,23 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
         }
     }
     
-    
+    /**
+     * Create a DocumentInfo object for the requestHandler 
+     * 
+     * @return DocumentInfo
+     */
+    protected DocumentInfo makeRequestDocInfo() {
+        getMediaInfo();
+        int type = mediaEl.getTagId() == HTMLElement.TAG_VIDEO ? 
+            DocumentInfo.TYPE_VIDEO : DocumentInfo.TYPE_AUDIO;
+        return new DocumentInfo(mediaURI, type);
+    }
     
     public InputStream getMediaInputStream() throws IOException {
         InputStream result = null;
-        getMediaInfo();
         
-        int type = mediaEl.getTagId() == HTMLElement.TAG_VIDEO ? 
-            DocumentInfo.TYPE_VIDEO : DocumentInfo.TYPE_AUDIO;
         result = htmlC.getRequestHandler().resourceRequested(
-            new DocumentInfo(mediaURI, type));
+            makeRequestDocInfo());
         
         if(result == null && htmlC.getHTMLCallback() != null) {
             htmlC.getHTMLCallback().parsingError(100, mediaEl.getTagName(), "src", 

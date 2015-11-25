@@ -25,7 +25,8 @@
 package com.sun.lwuit.mediaplayer;
 
 /**
- *
+ * Represents a class that can supply a player object to play media streams
+ * 
  * @author mike
  */
 public interface LWUITMediaPlayerManager {

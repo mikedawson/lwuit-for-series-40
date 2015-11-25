@@ -23,6 +23,7 @@
  */
 package com.sun.lwuit.mediaplayer;
 
+import com.sun.lwuit.html.HTMLCallback;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -43,18 +44,24 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     private Hashtable listeners;
     
-    public static final int CLOSED_DEALLOCATED_OK = 0;
     
-    public static final int CLOSED_ALEADY = 1;
-    
-    public static final int NOTHING_TO_CLOSE = 1;
    
+    private HTMLCallback callback;
     
     public MIDPMediaPlayer() {
         players = new Hashtable();
         listeners = new Hashtable();
     }
     
+    public void setCallback(HTMLCallback callback) {
+        this.callback = callback;
+    }
+    
+    void callbackParsingError(int id, String tag, String attribute, String value, String description) {
+        if(callback != null) {
+            callback.parsingError(id, tag, attribute, value, description);
+        }
+    }
     
     public synchronized void realizePlayer(InputStream in, String mimeType, String id) throws MediaException, IOException {
         Player newPlayer = Manager.createPlayer(in, mimeType);
@@ -96,18 +103,18 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
                 try {
                     player.stop();
                     player.deallocate();
-                    retVal = CLOSED_DEALLOCATED_OK;
+                    retVal = LWUITMediaPlayer.CLOSED_DEALLOCATED_OK;
                 }catch(MediaException e) {
                     me = e;
                 }
             }else {
-                retVal = CLOSED_ALEADY;
+                retVal = LWUITMediaPlayer.CLOSED_ALEADY;
             }
             player.close();
             players.remove(id);
             listeners.remove(id);
         }else {
-            retVal = NOTHING_TO_CLOSE;
+            retVal = LWUITMediaPlayer.NOTHING_TO_CLOSE;
         }
         
         if(me != null) {
@@ -154,9 +161,16 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     }
 
     public void playerUpdate(Player player, String event, Object eventData) {
+        callbackParsingError(180, "MIDMediaPlayer", "playerUpdate", event, 
+            ""+eventData);
         String id = getIDByPlayer(player);
-        System.out.println("playerUpdate: " + id + "/" + event);
-        firePlayerUpdate(player, id, event, eventData);
+        callbackParsingError(180, "MIDMediaPlayer", "playerUpdate-id", event, 
+            ""+id);
+        if(id != null) {
+            firePlayerUpdate(player, id, event, eventData);
+        }
+        callbackParsingError(180, "MIDMediaPlayer", "playerUpdate-done", event, 
+            ""+id);
     }
     
     public int getState(String id) {
@@ -171,7 +185,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     void firePlayerUpdate(Player player, String id, String event, Object eventData) {
         Object playerListenersObj = listeners.get(id);
         if(playerListenersObj != null) {
-            Vector playerListeners = (Vector)listeners.get(id);
+            Vector playerListeners = (Vector)playerListenersObj;
             for(int i = 0; i < playerListeners.size(); i++) {
                 ((MediaPlayerListener)playerListeners.elementAt(i)).playerUpdate(this, 
                     id, event, eventData);
