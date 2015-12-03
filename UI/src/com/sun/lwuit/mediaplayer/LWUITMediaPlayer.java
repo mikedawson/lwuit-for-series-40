@@ -24,6 +24,7 @@
 
 package com.sun.lwuit.mediaplayer;
 
+import com.sun.lwuit.Component;
 import java.io.InputStream;
 
 /**
@@ -100,7 +101,7 @@ public interface LWUITMediaPlayer {
      * @param id An id that will be used to refer to it for future operations, events, etc.
      * @throws Exception If something goes wrong in the underlying implementation
      */
-    public void realizePlayer(InputStream in, String mimeType, String id) throws Exception;
+    public Object realizePlayer(InputStream in, String mimeType, String id, boolean hasVideo) throws Exception;
     
     /**
      * Start the media playing
@@ -151,5 +152,8 @@ public interface LWUITMediaPlayer {
      * @return  State of the given player as per the status constants
      */
     public int getState(String id);
+    
+    public Component makeVideoPlaceholder(String id);
+    
     
 }

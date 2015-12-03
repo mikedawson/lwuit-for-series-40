@@ -33,6 +33,8 @@ import javax.microedition.media.Manager;
 import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
+import com.sun.lwuit.Component;
+import com.sun.lwuit.VideoComponent;
 
 /**
  *
@@ -44,9 +46,14 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     private Hashtable listeners;
     
+    private Hashtable videoComps;
     
-   
     private HTMLCallback callback;
+    
+    /**
+     * The maximum size of a video file to attempt to play directly through buffering
+     */
+    public static final int MAXBUFFER = 300000;
     
     public MIDPMediaPlayer() {
         players = new Hashtable();
@@ -63,10 +70,32 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         }
     }
     
-    public synchronized void realizePlayer(InputStream in, String mimeType, String id) throws MediaException, IOException {
-        Player newPlayer = Manager.createPlayer(in, mimeType);
+    public Object realizePlayer(InputStream in, String mimeType, String id, boolean isVideo) throws MediaException, IOException {
+        MIDPVideoPlaceholder comp = null;
+        Player newPlayer = null;
+        if(isVideo) {
+            MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
+            
+            if(in.available() > MAXBUFFER || in.available() == -1) {
+                //we need to copy all this into a temporary file
+                
+            }else {
+                //we can play it directly...
+                
+            }
+            
+            placeholder.setVideoComponent(VideoComponent.createVideoPeer(in, mimeType));
+            newPlayer = placeholder.getPlayer();
+            videoComps.put(id, comp);
+        }else {
+            newPlayer = Manager.createPlayer(in, mimeType);
+        }
+        
+        
         players.put(id, newPlayer);
         newPlayer.addPlayerListener(this);
+        
+        return comp;
     }
     
     Player getPlayerByID(String id) {
@@ -89,8 +118,22 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         return null;
     }
     
+    public Component makeVideoPlaceholder(String id) {
+        if(videoComps == null) {
+            videoComps = new Hashtable();
+        }
+        
+        Component comp = new MIDPVideoPlaceholder();
+        videoComps.put(id, comp);
+        return comp;
+    }
+    
     public void startPlayer(String id) throws MediaException {
-        getPlayerByID(id).start();
+        if(videoComps != null && videoComps.containsKey(id)) {
+            ((MIDPVideoPlaceholder)videoComps.get(id)).getVideoComponent().start();
+        }else {
+            getPlayerByID(id).start();
+        }
     }
 
     public synchronized int stopPlayer(String id) throws MediaException {

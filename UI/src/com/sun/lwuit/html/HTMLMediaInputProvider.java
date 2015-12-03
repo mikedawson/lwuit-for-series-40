@@ -93,4 +93,8 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
         return mimeType;
     }
     
+    public boolean isVideo() {
+        return mediaEl.getTagId() == HTMLElement.TAG_VIDEO;
+    }
+    
 }

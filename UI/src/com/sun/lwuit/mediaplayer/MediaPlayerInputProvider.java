@@ -54,4 +54,12 @@ public interface MediaPlayerInputProvider {
      */
     public String getMimeType();
     
+    /**
+     * Used to tell if this media input has video or not - technically
+     * one could look at the mime type if it starts with audio/ or video/
+     * however one might use a video file only for it's sound...
+     * 
+     * @return true if this media input has video - false otherwise
+     */
+    public boolean isVideo();
 }

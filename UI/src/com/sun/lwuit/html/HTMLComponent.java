@@ -3364,6 +3364,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                    }
                    break;
                case HTMLElement.TAG_AUDIO:
+               case HTMLElement.TAG_VIDEO:
                    if(mediaPlayerEnabled) {
                         boolean controlsEnabled = 
                            child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null;
