@@ -127,6 +127,10 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     
     private boolean isVideo;
     
+    private int preferVideoW;
+    
+    private int preferVideoH;
+    
     static {
         mimeTypes.put(".mp3", "audio/mpeg");
         mimeTypes.put(".wav", "audio/x-wav");
@@ -141,7 +145,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
      * @param callback Optional HTMLCallback that can be used to reporting back using the parseError method (can be null)
      * @param controlsEnabled True to enable play/pause/stop buttons false otherwise
      */
-    public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled) {
+    public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled, int preferVideoW, int preferVideoH) {
         this.mediaPlayer = mediaPlayer;
         this.callback = callback;
         this.provider = provider;
@@ -156,14 +160,38 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         state = UNREALIZED;
         
         playerID = "mplayer" + getNextAutoID();
+        
+        this.preferVideoW = preferVideoW;
+        this.preferVideoH = preferVideoH;
+    }
+    
+    public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled) {
+        this(mediaPlayer, provider, callback, controlsEnabled, -1, -1);
+    }
+    
+    /**
+     * Set the preferred video width and height
+     * 
+     * @param width Width in pixels or -1 for auto
+     * @param height Height in pixels or -1 for auto
+     */
+    public void setPreferredVideoDimension(int width, int height) {
+        this.preferVideoW = width;
+        this.preferVideoH = height;
+        
+        if(videoContainer != null) {
+            if(preferVideoW != -1)
+                videoContainer.setPreferredW(preferVideoW);
+            if(preferVideoH != -1)
+                videoContainer.setPreferredH(preferVideoH);
+        }
     }
     
     void setupButtons() {
         if(isVideo && videoContainer == null) {
             videoContainer = mediaPlayer.makeVideoPlaceholder(playerID);
             videoContainer.getStyle().setBorder(Border.createLineBorder(2));
-            videoContainer.setPreferredW(200);
-            videoContainer.setPreferredH(150);
+            setPreferredVideoDimension(preferVideoW, preferVideoH);
             addComponent(videoContainer);
         }
         

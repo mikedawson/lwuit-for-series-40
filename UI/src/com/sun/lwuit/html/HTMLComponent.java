@@ -3374,10 +3374,16 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                         }else {
                             provider = new HTMLMediaInputProvider(this, child);
                         }
-                       
+                        
+                        int cWidth = calcSize(getWidth(), 
+                            child.getAttributeById(HTMLElement.ATTR_WIDTH),getWidth(),false);
+                        int cHeight = calcSize(getHeight(), 
+                            child.getAttributeById(HTMLElement.ATTR_HEIGHT),
+                            (int)((getWidth()*3)/4),false);
+                        
                         MediaPlayerComp mPlayer = new MediaPlayerComp(
                             DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
-                            provider, htmlCallback, controlsEnabled);
+                            provider, htmlCallback, controlsEnabled, cWidth, cHeight);
                         curLine.addComponent(mPlayer);
                         child.setAssociatedComponents(mPlayer);
                        
@@ -3941,6 +3947,37 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
     }
 
+    /**
+     * Recalculate the size of an image or video based on the image constraint
+     * policy for this HTMLComponent.  
+     * 
+     * @see HTMLComponent#setImageConstrainPolicy(int) 
+     * 
+     * @param originalWidth The desired width of the item
+     * @param originalHeight The desired height of the item
+     * 
+     * @return Dimension with appropriately set width and height according to policy
+     */
+    Dimension recalcSize(int width, int height) {
+        int availableSize = getWidth();
+        boolean constrain = 
+            (imgConstraints & HTMLComponent.IMG_CONSTRAIN_WIDTH) == HTMLComponent.IMG_CONSTRAIN_WIDTH;
+        if(constrain & availableSize < width) {
+            height = height * availableSize/width;
+            width = availableSize;
+        }
+
+        availableSize = getParent() != null ? getParent().getHeight() : Display.getInstance().getDisplayHeight();
+        constrain = 
+            (imgConstraints & HTMLComponent.IMG_CONSTRAIN_HEIGHT) == HTMLComponent.IMG_CONSTRAIN_HEIGHT;
+        if(constrain & availableSize < height) {
+            width = width * availableSize/height;
+            height = availableSize;
+        }
+        
+        return new Dimension(width, height);
+    }
+    
     /**
      * Calculates width or height of an element according to its original size, requested size and default size
      * 

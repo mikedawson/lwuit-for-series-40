@@ -558,21 +558,9 @@ class ResourceThreadQueue {
                 }
             }
             
-            int availableSize = htmlC.getWidth();
-            boolean constrain = 
-                (htmlC.imgConstraints & HTMLComponent.IMG_CONSTRAIN_WIDTH) == HTMLComponent.IMG_CONSTRAIN_WIDTH;
-            if(constrain & availableSize < width) {
-                height = height * availableSize/width;
-                width = availableSize;
-            }
-            
-            availableSize = htmlC.getParent() != null ? htmlC.getParent().getHeight() : Display.getInstance().getDisplayHeight();
-            constrain = 
-                (htmlC.imgConstraints & HTMLComponent.IMG_CONSTRAIN_HEIGHT) == HTMLComponent.IMG_CONSTRAIN_HEIGHT;
-            if(constrain & availableSize < height) {
-                width = width * availableSize/height;
-                height = availableSize;
-            }
+            Dimension constrainedDimension = htmlC.recalcSize(width, height);
+            width = constrainedDimension.getWidth();
+            height = constrainedDimension.getHeight();
             
             if (width!=0) { // if any of width or height were not 0, the other one was set to non-zero above, so this check suffices
                 img=img.scaled(width, height);
@@ -580,6 +568,8 @@ class ResourceThreadQueue {
                 height+=htmlC.imgReservationSpace[Component.TOP]+htmlC.imgReservationSpace[Component.BOTTOM];
                 label.setPreferredSize(new Dimension(width,height));
             }
+            
+            
 
             label.setIcon(img);
 
