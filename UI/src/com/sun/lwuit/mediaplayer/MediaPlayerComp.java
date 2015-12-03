@@ -162,8 +162,8 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         if(isVideo && videoContainer == null) {
             videoContainer = mediaPlayer.makeVideoPlaceholder(playerID);
             videoContainer.getStyle().setBorder(Border.createLineBorder(2));
-            videoContainer.setPreferredH(200);
-            videoContainer.setPreferredW(300);
+            videoContainer.setPreferredW(200);
+            videoContainer.setPreferredH(150);
             addComponent(videoContainer);
         }
         
@@ -276,7 +276,6 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         if(state == UNREALIZED) {
             state = LOADING;
             setPlayButtonCommand(PAUSE);
-            final Component cmp = mediaPlayer.makeVideoPlaceholder(playerID);
             
             if(provider instanceof AsyncMediaInputProvider) {
                 ((AsyncMediaInputProvider)provider).getMediaInputStreamAsync(this);

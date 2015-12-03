@@ -46,7 +46,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     private Hashtable listeners;
     
-    private Hashtable videoComps;
+    Hashtable videoComps;
     
     private HTMLCallback callback;
     

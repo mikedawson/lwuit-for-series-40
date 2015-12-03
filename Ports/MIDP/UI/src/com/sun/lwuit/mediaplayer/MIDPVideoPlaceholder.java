@@ -34,8 +34,10 @@ public class MIDPVideoPlaceholder extends Container{
     
     public void setVideoComponent(final VideoComponent videoComp) {
         this.videoComp = videoComp;
+        
         Display.getInstance().callSerially(new Runnable() {
             public void run() {
+                statusLabel.setText("playing");
                 removeComponent(statusLabel);
                 addComponent(BorderLayout.CENTER, videoComp);
                 revalidate();
