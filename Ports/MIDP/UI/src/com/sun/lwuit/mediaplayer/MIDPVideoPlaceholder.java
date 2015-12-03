@@ -6,6 +6,7 @@
 package com.sun.lwuit.mediaplayer;
 
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.VideoComponent;
 import com.sun.lwuit.layouts.BorderLayout;
@@ -22,7 +23,7 @@ public class MIDPVideoPlaceholder extends Container{
     private Label statusLabel;
     
     public MIDPVideoPlaceholder() {
-        this.statusLabel = new Label("0%");
+        statusLabel = new Label("0%");
         setLayout(new BorderLayout());
         addComponent(BorderLayout.CENTER, statusLabel);
     }
@@ -31,10 +32,17 @@ public class MIDPVideoPlaceholder extends Container{
         return videoComp;
     }
     
-    public void setVideoComponent(VideoComponent videoComp) {
+    public void setVideoComponent(final VideoComponent videoComp) {
         this.videoComp = videoComp;
-        removeComponent(this.statusLabel);
-        addComponent(BorderLayout.CENTER, videoComp);
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                removeComponent(statusLabel);
+                addComponent(BorderLayout.CENTER, videoComp);
+                revalidate();
+            }
+        });
+        
+        
     }
     
     public void setStatus(int loadedPercent) {

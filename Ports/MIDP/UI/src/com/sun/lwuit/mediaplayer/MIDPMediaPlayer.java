@@ -71,7 +71,6 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     }
     
     public Object realizePlayer(InputStream in, String mimeType, String id, boolean isVideo) throws MediaException, IOException {
-        MIDPVideoPlaceholder comp = null;
         Player newPlayer = null;
         if(isVideo) {
             MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
@@ -86,7 +85,6 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
             
             placeholder.setVideoComponent(VideoComponent.createVideoPeer(in, mimeType));
             newPlayer = placeholder.getPlayer();
-            videoComps.put(id, comp);
         }else {
             newPlayer = Manager.createPlayer(in, mimeType);
         }
@@ -95,7 +93,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         players.put(id, newPlayer);
         newPlayer.addPlayerListener(this);
         
-        return comp;
+        return null;
     }
     
     Player getPlayerByID(String id) {
