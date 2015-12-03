@@ -167,9 +167,19 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         setupButtons();
     }
     
+    /**
+     * Return the buttons that are focusable (used by HTMLComponent) for 
+     * firstFocusable
+     * 
+     * @return Array of focusable components or null if there are none
+     */
     public Component[] getUIComponents() {
         setupButtons();
-        return new Component[]{playPauseButton, stopButton};
+        if(controlsEnabled) {
+            return new Component[]{playPauseButton, stopButton};
+        }else {
+            return null;
+        }
     }
     
     /**

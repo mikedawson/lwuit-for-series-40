@@ -3380,7 +3380,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                         curLine.addComponent(mPlayer);
                         child.setAssociatedComponents(mPlayer);
                        
-                        if (eventsListener!=null) {
+                        if (controlsEnabled && eventsListener!=null) {
                             Component[] cmps = mPlayer.getUIComponents();
                             for(int j = 0; j < cmps.length; j++) {
                                 eventsListener.registerComponent(cmps[j], child);
