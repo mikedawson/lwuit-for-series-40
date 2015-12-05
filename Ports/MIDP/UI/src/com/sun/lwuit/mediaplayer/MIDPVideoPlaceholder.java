@@ -75,8 +75,20 @@ public class MIDPVideoPlaceholder extends Container implements Runnable{
                 revalidate();
             }
         });
-        
-        
+    }
+    
+    
+    /**
+     * Put the status text back when the video has 
+     */
+    public void handleVideoStopped() {
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                removeAll();
+                addComponent(BorderLayout.CENTER, statusLabel);
+                revalidate();
+            }
+        });
     }
     
     public void setStatus(int loadedPercent) {

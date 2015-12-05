@@ -25,6 +25,7 @@
 package com.sun.lwuit.mediaplayer;
 
 import com.sun.lwuit.Component;
+import com.sun.lwuit.html.HTMLCallback;
 import java.io.InputStream;
 
 /**
@@ -93,6 +94,11 @@ public interface LWUITMediaPlayer {
     public static final int NOTHING_TO_CLOSE = 1;
     
     /**
+     * Status returned when the player was buffering and that has been cancelledd
+     */
+    public static final int BUFFERING_CANCELLED = 2;
+    
+    /**
      * Realize a player for the given inputstream and mimetype.  It can be referred
      * to by the given id which must be unique
      * 
@@ -135,9 +141,10 @@ public interface LWUITMediaPlayer {
     /**
      * Stop all currently active players
      * 
+     * @param clearTempFiles True to make the player clear out all temp files as well
      * @return Description of errors encountered as a string.  A blank String "" means everything is OK
      */
-    public String stopAllPlayers();
+    public String stopAllPlayers(boolean clearTempFiles);
     
     /**
      * Listener for player events (follows the JSR-135 scheme)
@@ -156,6 +163,15 @@ public interface LWUITMediaPlayer {
     public int getState(String id);
     
     public Component makeVideoPlaceholder(String id);
+    
+    /**
+     * Remove any temporary files that may have been created and are not being
+     * used with players (this should only be run once all players have
+     * stopped)
+     * 
+     * @return Number of temp files removed
+     */
+    public int clearTempFiles();
     
     
 }

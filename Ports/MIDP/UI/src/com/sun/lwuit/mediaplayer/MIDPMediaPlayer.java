@@ -56,10 +56,25 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     private static String cacheDir;
     
+    public static final int CACHECLEAR_NOCACHEDIR = -2;
+    
+    /**
+     * Hashtable of playerID -> Boolean true or false.  True = continue loading, false = cancel
+     */
+    private Hashtable bufferingPlayers;
+    
+    /**
+     * The prefix that is used when we need to buffer large media objects
+     * to file for them to play successfully.
+     * 
+     */
+    public static final String TMPFILE_PREFIX = "tmp-lwuitmedia";
+    
     /**
      * The maximum size of a video file to attempt to play directly through buffering
      */
     public static final int MAXBUFFER = 400000;
+    
     
     /**
      * When the size of a file to playback exceeds the available memory
@@ -112,15 +127,65 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         return tmpFile;
     }
     
-    public static int clearCacheFiles() {
+    /**
+     * Remove any remaining temporary player files that are in the cache
+     * dir with the cache prefix
+     * 
+     * @param callback HTMLCallback to use to reporting error messages through 
+     * 
+     * @return the number of files removed or a negative value indicating an error
+     */
+    public int clearTempFiles() {
+        FileConnection con = null;
+        int clearedFiles = 0;
         
-        return -1;
+        if(cacheDir == null) {
+            return CACHECLEAR_NOCACHEDIR;
+        }
+        
+        try {
+            con = (FileConnection)Connector.open(cacheDir);
+            Enumeration tmpFiles = con.list(TMPFILE_PREFIX+"*", true);
+            Vector tmpFilesToDel = new Vector();
+            while(tmpFiles.hasMoreElements()) {
+                tmpFilesToDel.addElement(tmpFiles.nextElement());
+            }
+            tmpFiles = null;
+            con.close();
+            
+            String dirPrefix = cacheDir;
+            if(!dirPrefix.endsWith("/")) {
+                dirPrefix += '/';
+            }
+            
+            String fileURI;
+            for(int i = 0; i < tmpFilesToDel.size(); i++) {
+                fileURI = dirPrefix + tmpFilesToDel.elementAt(i);
+                con = (FileConnection)Connector.open(fileURI);
+                con.delete();
+                clearedFiles++;
+                con.close();
+                con = null;
+            }
+        }catch(Exception e) {
+            callbackParsingError(155, "video", "clearCacheFiles", e.toString(), 
+                e.getMessage());
+        }finally {
+            if(con != null) {
+                try { con.close(); }
+                catch(IOException e) {}
+                con = null;
+            }
+        }
+        
+        return clearedFiles;
     }
     
     
     public MIDPMediaPlayer() {
         players = new Hashtable();
         listeners = new Hashtable();
+        bufferingPlayers = new Hashtable();
     }
     
     public void setCallback(HTMLCallback callback) {
@@ -135,16 +200,24 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     public Object realizePlayer(InputStream in, String mimeType, String id, boolean isVideo, int mediaSize) throws MediaException, IOException {
         Player newPlayer = null;
+        boolean cancelled = false;
+        
         if(isVideo) {
             final MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
             VideoComponent vc = null;
             
             boolean bufferTofile = mediaSize == -1 || mediaSize > MAXBUFFER;
+            
+            
             if(bufferTofile) {
+                bufferingPlayers.put(id, Boolean.TRUE);
                 //we need to copy all this into a temporary file
                 callbackParsingError(600, "video", "cacheRequired", ""+mediaSize, 
                     cacheDir);
-                String tmpFile = getTempFile("tmp-video-file.3gp", mediaSize);                
+                String tmpExtension = MediaPlayerComp.getExtensionByMimeType(mimeType);
+                
+                String tmpFile = getTempFile(TMPFILE_PREFIX +tmpExtension, 
+                    mediaSize);
                 
                 callbackParsingError(600, "video", "getTmpDir", tmpFile, 
                     cacheDir);
@@ -163,7 +236,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
                     long lastUpdate = System.currentTimeMillis();
                     long timeNow;
                     
-                    while((bytesRead = in.read(buf)) != -1) {
+                    while((bytesRead = in.read(buf)) != -1 && !cancelled) {
                         fout.write(buf, 0, bytesRead);
                         bytesCompleted += bytesRead;
                         percentComplete = bytesCompleted / (mediaSize/100);
@@ -173,6 +246,13 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
                             lastUpdate = timeNow;
                             percentDislpayed = percentComplete;
                             placeholder.setAsyncStatus(percentComplete);
+                            Display.getInstance().callSerially(placeholder);
+                        }
+                        
+                        if(bufferingPlayers.get(id).equals(Boolean.FALSE)) {
+                            //we have been told to stop - give up...
+                            cancelled = true;
+                            placeholder.setAsyncStatus(0);
                             Display.getInstance().callSerially(placeholder);
                         }
                     }
@@ -193,26 +273,46 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
                 
                 callbackParsingError(602, "video", "readyFromTmpFile", tmpFile, 
                     "");
-                vc = VideoComponent.createVideoPeer(tmpFile);
-                
+                if(!cancelled) {
+                    vc = VideoComponent.createVideoPeer(tmpFile);
+                }
                 
             }else {
                 //we can play it directly...
                 vc = VideoComponent.createVideoPeer(in, mimeType);
             }
             
-            placeholder.setVideoComponent(vc);
-            newPlayer = placeholder.getPlayer();
+            if(!cancelled) {
+                placeholder.setVideoComponent(vc);
+                newPlayer = placeholder.getPlayer();
+            }
         }else {
             newPlayer = Manager.createPlayer(in, mimeType);
         }
         
-        
-        players.put(id, newPlayer);
-        newPlayer.addPlayerListener(this);
+        if(!cancelled) {
+            players.put(id, newPlayer);
+            newPlayer.addPlayerListener(this);
+        }
         
         return null;
     }
+    
+    /**
+     * Cancel any ongoing buffernig for the player given by playerID
+     * 
+     * @param playerID The player to cancel buffering for
+     * @return true if the player was buffering and now knows to stop, false otherwise
+     */
+    private boolean cancelBuffering(String playerID) {
+        if(bufferingPlayers.containsKey(playerID)) {
+            bufferingPlayers.put(playerID, Boolean.FALSE);
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
     
     Player getPlayerByID(String id) {
         Object playerObj = players.get(id);
@@ -256,6 +356,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         int retVal = -1;
         Player player = getPlayerByID(id);
         MediaException me = null;
+        
         if(player != null) {
             int state = player.getState();
             if(state != Player.CLOSED) {
@@ -273,7 +374,15 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
             players.remove(id);
             listeners.remove(id);
         }else {
-            retVal = LWUITMediaPlayer.NOTHING_TO_CLOSE;
+            if(cancelBuffering(id)) {
+                retVal = LWUITMediaPlayer.BUFFERING_CANCELLED;
+            }else {
+                retVal = LWUITMediaPlayer.NOTHING_TO_CLOSE;
+            }
+        }
+        
+        if(videoComps != null && videoComps.containsKey(id)) {
+            ((MIDPVideoPlaceholder)videoComps.get(id)).handleVideoStopped();
         }
         
         if(me != null) {
@@ -288,7 +397,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         player.stop();
     }
 
-    public String stopAllPlayers()  {
+    public String stopAllPlayers(boolean clearTempFiles)  {
         Vector playerIDS = new Vector();
         Enumeration idsE = players.keys();
         while(idsE.hasMoreElements()) {
@@ -302,6 +411,10 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
             }catch(Exception e) {
                 errors.append(e.toString()).append(e.getMessage()).append('\n');
             }
+        }
+        
+        if(clearTempFiles) {
+            clearTempFiles();
         }
         
         return errors.toString();

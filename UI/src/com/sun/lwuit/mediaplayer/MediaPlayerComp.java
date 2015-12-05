@@ -36,6 +36,7 @@ import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.Border;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -75,10 +76,14 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
      */
     public static final int PLAY = 100002;
     
+    public static final Integer PLAY_OBJ = new Integer(PLAY);
+    
     /**
      * The player is currently paused
      */
     public static final int PAUSE = 100003;
+    
+    private static final Integer PAUSE_OBJ = new Integer(PAUSE);
     
     /**
      * The player is currently stopped
@@ -137,7 +142,10 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         mimeTypes.put(".mp3", "audio/mpeg");
         mimeTypes.put(".wav", "audio/x-wav");
         mimeTypes.put(".3gp", "video/3gpp");
+        mimeTypes.put(".mp4", "video/mp4");
     }
+    
+    private Hashtable actionAfterRealize;
     
     /**
      * Make a new MediaPlayerComponent 
@@ -166,6 +174,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         this.preferVideoW = preferVideoW;
         this.preferVideoH = preferVideoH;
         mediaSize = -1;
+        actionAfterRealize = new Hashtable();
     }
     
     public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled) {
@@ -257,6 +266,25 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     }
     
     /**
+     * Get the expected file extension according to the mime type
+     * 
+     * @param mimeType The mime type e.g. audio/mpeg
+     * @return The expected file extension including . e.g. ".mp3" or null if not known
+     */
+    public static String getExtensionByMimeType(String mimeType) {
+        String extension = null;
+        Enumeration keys = mimeTypes.keys();
+        while(keys.hasMoreElements()) {
+            extension = (String)keys.nextElement();
+            if(mimeTypes.get(extension).equals(mimeType)) {
+                return extension;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
      * Register a file extension so that it gets returned when getMimeTypeByExtension
      * is used
      * 
@@ -306,6 +334,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             "");
         if(state == UNREALIZED) {
             state = LOADING;
+            actionAfterRealize.put(playerID, new Integer(PLAY));
             setPlayButtonCommand(PAUSE);
             
             if(provider instanceof AsyncMediaInputProvider) {
@@ -313,6 +342,16 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             }else {
                 realizeThread = new RealizePlayerThread();
                 realizeThread.start();
+            }
+        }else if(state == LOADING) {
+            //it's loading right now - so toggle what to do after realization finishes
+            Object statusObj = actionAfterRealize.get(playerID);
+            if(statusObj != null && statusObj.equals(PLAY_OBJ)) {
+                actionAfterRealize.put(playerID, PAUSE_OBJ);
+                setPlayButtonCommand(PLAY);
+            }else {
+                actionAfterRealize.put(playerID, PLAY_OBJ);
+                setPlayButtonCommand(PAUSE);
             }
         }else if(state == PLAY) {
             //time to pause
@@ -361,9 +400,13 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
                 provider.isVideo(), mediaSize);
             callbackParsingError(201, "video", playerID,
                         "realized player", "");
-            mediaPlayer.startPlayer(playerID);
-            state = PLAY;
-
+            Object whatNext = actionAfterRealize.get(playerID);
+            if(whatNext == null || whatNext.equals(PLAY_OBJ)) {
+                mediaPlayer.startPlayer(playerID);
+                state = PLAY;
+            }else if(whatNext.equals(PAUSE_OBJ)) {
+                state = PAUSE;
+            }
         }catch(Exception e) {
             callbackParsingError(103, "MediaPlayerComp", "startPlaying", null, 
                     e.getMessage() + ": " + e.toString());
