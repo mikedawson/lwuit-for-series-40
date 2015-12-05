@@ -99,9 +99,11 @@ public interface LWUITMediaPlayer {
      * @param in InputStream that provides media to play
      * @param mimeType Mime type of the content to play e.g. audio/mpeg
      * @param id An id that will be used to refer to it for future operations, events, etc.
+     * @param mediaSize The length of the media to play or -1 if length is unknown
+     * 
      * @throws Exception If something goes wrong in the underlying implementation
      */
-    public Object realizePlayer(InputStream in, String mimeType, String id, boolean hasVideo) throws Exception;
+    public Object realizePlayer(InputStream in, String mimeType, String id, boolean hasVideo, int mediaSize) throws Exception;
     
     /**
      * Start the media playing

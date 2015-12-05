@@ -14,13 +14,17 @@ import javax.microedition.media.Player;
 
 /**
  *
+ * 
+ * 
  * @author mike
  */
-public class MIDPVideoPlaceholder extends Container{
+public class MIDPVideoPlaceholder extends Container implements Runnable{
     
     private VideoComponent videoComp;
     
     private Label statusLabel;
+    
+    private int percentToUpdateTo = -1;
     
     public MIDPVideoPlaceholder() {
         statusLabel = new Label("0%");
@@ -31,6 +35,34 @@ public class MIDPVideoPlaceholder extends Container{
     public VideoComponent getVideoComponent() {
         return videoComp;
     }
+
+    /**
+     * Get the percentage status pending to be displayed
+     * 
+     * @return The percentage status that will be dislpayed the next time run is called
+     */
+    public synchronized int getAsyncStatus() {
+        return percentToUpdateTo;
+    }
+
+    /**
+     * Async method to set the status: because in LWUIT we should make UI
+     * changes using Dislpay.callSerially and this is used to reflect
+     * the progress of an IO job it's helpful to be able to set this in an async
+     * manner.  That's why this class implements the Runnable interface so a 
+     * job running can call this method and then put it in the callSerially list
+     * like so:
+     * 
+     * placeholder.setAsyncStatus(10)
+     * Display.getInstance().callSerially(placeholer)
+     * 
+     * @param percentToUpdateTo the percentage to show the next time run is called
+     */
+    public synchronized void setAsyncStatus(int percentToUpdateTo) {
+        this.percentToUpdateTo = percentToUpdateTo;
+    }
+    
+    
     
     public void setVideoComponent(final VideoComponent videoComp) {
         this.videoComp = videoComp;
@@ -59,5 +91,15 @@ public class MIDPVideoPlaceholder extends Container{
         }
     }
     
+    public void run() {
+        int updateTo = getAsyncStatus();
+        
+        if(updateTo != -1 && statusLabel != null) {
+            setStatus(updateTo);
+            setAsyncStatus(-1);
+        }
+        
+        
+    }
     
 }

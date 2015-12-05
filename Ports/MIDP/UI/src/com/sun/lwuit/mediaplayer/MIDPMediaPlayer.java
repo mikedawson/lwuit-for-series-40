@@ -34,7 +34,11 @@ import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import com.sun.lwuit.Component;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.VideoComponent;
+import java.io.OutputStream;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
 
 /**
  *
@@ -50,10 +54,69 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     private HTMLCallback callback;
     
+    private static String cacheDir;
+    
     /**
      * The maximum size of a video file to attempt to play directly through buffering
      */
-    public static final int MAXBUFFER = 300000;
+    public static final int MAXBUFFER = 400000;
+    
+    /**
+     * When the size of a file to playback exceeds the available memory
+     * we need to save the file to a directory and create the player
+     * using the file URI instead
+     * 
+     * @param newCacheDir Directory to use for cache files
+     */
+    public static void setCacheDir(String newCacheDir) {
+        cacheDir = newCacheDir;
+    }
+    
+    public static String getTempFile(String basename, long sizeRequired) {
+        if(cacheDir == null) {
+            return null;
+        }
+        
+        String tmpFile = null;
+        FileConnection fCon = null;
+        try {
+            fCon = (FileConnection)Connector.open(cacheDir);
+            long cacheAvailable = fCon.availableSize();
+            fCon.close();
+            fCon = null;
+                
+            if(cacheAvailable >= sizeRequired) {
+                tmpFile = cacheDir;
+                if(!tmpFile.endsWith("/")) {
+                    tmpFile += '/';
+                }
+                
+                tmpFile += basename;
+                
+                fCon = (FileConnection)Connector.open(tmpFile);
+                if(fCon.exists()) {
+                    fCon.delete();
+                }
+                
+                fCon.create();
+            }
+        }catch(Exception e) {
+            
+        }finally {
+            if(fCon != null) {
+                try { fCon.close(); }
+                catch(Exception e) {}
+            }
+        }
+        
+        return tmpFile;
+    }
+    
+    public static int clearCacheFiles() {
+        
+        return -1;
+    }
+    
     
     public MIDPMediaPlayer() {
         players = new Hashtable();
@@ -70,20 +133,75 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         }
     }
     
-    public Object realizePlayer(InputStream in, String mimeType, String id, boolean isVideo) throws MediaException, IOException {
+    public Object realizePlayer(InputStream in, String mimeType, String id, boolean isVideo, int mediaSize) throws MediaException, IOException {
         Player newPlayer = null;
         if(isVideo) {
-            MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
+            final MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
+            VideoComponent vc = null;
             
-            if(in.available() > MAXBUFFER || in.available() == -1) {
+            boolean bufferTofile = mediaSize == -1 || mediaSize > MAXBUFFER;
+            if(bufferTofile) {
                 //we need to copy all this into a temporary file
+                callbackParsingError(600, "video", "cacheRequired", ""+mediaSize, 
+                    cacheDir);
+                String tmpFile = getTempFile("tmp-video-file.3gp", mediaSize);                
+                
+                callbackParsingError(600, "video", "getTmpDir", tmpFile, 
+                    cacheDir);
+                
+                
+                OutputStream fout = null;
+                int bufSize = 10240;
+                try {
+                    fout = Connector.openOutputStream(tmpFile);
+                    byte[] buf = new byte[bufSize];
+                    int bytesRead;
+                    int bytesCompleted = 0;
+                    
+                    int percentComplete = 0;
+                    int percentDislpayed = 0;
+                    long lastUpdate = System.currentTimeMillis();
+                    long timeNow;
+                    
+                    while((bytesRead = in.read(buf)) != -1) {
+                        fout.write(buf, 0, bytesRead);
+                        bytesCompleted += bytesRead;
+                        percentComplete = bytesCompleted / (mediaSize/100);
+                        timeNow = System.currentTimeMillis();
+                        
+                        if(timeNow - lastUpdate > 1000 && percentComplete - percentDislpayed >= 1) {
+                            lastUpdate = timeNow;
+                            percentDislpayed = percentComplete;
+                            placeholder.setAsyncStatus(percentComplete);
+                            Display.getInstance().callSerially(placeholder);
+                        }
+                    }
+                    
+                    fout.flush();
+                }catch(Exception e) {
+                    callbackParsingError(150, "video", "exception-extracting", 
+                        e.toString(), e.getMessage());
+                }finally {
+                    if(fout != null) {
+                        try { 
+                            fout.close(); 
+                        }
+                        catch(IOException ioe) {}
+                        fout = null;
+                    }
+                }
+                
+                callbackParsingError(602, "video", "readyFromTmpFile", tmpFile, 
+                    "");
+                vc = VideoComponent.createVideoPeer(tmpFile);
+                
                 
             }else {
                 //we can play it directly...
-                
+                vc = VideoComponent.createVideoPeer(in, mimeType);
             }
             
-            placeholder.setVideoComponent(VideoComponent.createVideoPeer(in, mimeType));
+            placeholder.setVideoComponent(vc);
             newPlayer = placeholder.getPlayer();
         }else {
             newPlayer = Manager.createPlayer(in, mimeType);

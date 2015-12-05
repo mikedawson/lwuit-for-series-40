@@ -131,6 +131,8 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     
     private int preferVideoH;
     
+    private int mediaSize;
+    
     static {
         mimeTypes.put(".mp3", "audio/mpeg");
         mimeTypes.put(".wav", "audio/x-wav");
@@ -163,6 +165,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         
         this.preferVideoW = preferVideoW;
         this.preferVideoH = preferVideoH;
+        mediaSize = -1;
     }
     
     public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled) {
@@ -355,7 +358,9 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
                         "got component", "");
             
             mediaPlayer.realizePlayer(in, provider.getMimeType(), playerID, 
-                provider.isVideo());
+                provider.isVideo(), mediaSize);
+            callbackParsingError(201, "video", playerID,
+                        "realized player", "");
             mediaPlayer.startPlayer(playerID);
             state = PLAY;
 
@@ -367,8 +372,9 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     }
     
     
-    public void mediaReady(InputStream in, String mimeType) {
+    public void mediaReady(InputStream in, String mimeType, int mediaSize) {
         this.in = in;
+        this.mediaSize = mediaSize;
         callbackParsingError(101, "RealizePlayerThread", 
                 "mediaReady", null, " : comp.in=" + in + 
                 " comp.mediaPlayer =" + mediaPlayer);
@@ -412,6 +418,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             
             try {
                 comp.in = comp.provider.getMediaInputStream();
+                comp.mediaSize = comp.provider.getMediaSize();
                 comp.callbackParsingError(101, "RealizePlayerThread", 
                         "addPlayerListener", null, " : comp.in=" + comp.in + " comp.mediaPlayer =" + comp.mediaPlayer);
                 comp.mediaPlayer.addMediaPlayerListener(comp.playerID, comp);

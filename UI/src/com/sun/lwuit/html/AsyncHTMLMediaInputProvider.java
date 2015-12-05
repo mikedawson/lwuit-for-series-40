@@ -28,7 +28,7 @@ public class AsyncHTMLMediaInputProvider extends HTMLMediaInputProvider implemen
     }
 
     public void streamReady(InputStream is, DocumentInfo docInfo) {
-        ioCallback.mediaReady(is, mimeType);
+        ioCallback.mediaReady(is, mimeType, docInfo.getContentLength());
     }
     
 }

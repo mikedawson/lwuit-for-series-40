@@ -17,15 +17,18 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
     protected String mediaURI;
     protected String mimeType;
     
+    protected DocumentInfo docInfo; 
+    protected int mediaSize;
+    
     public HTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl) {
         this.htmlC = htmlC;
         this.mediaEl = mediaEl;
+        this.mediaSize = -1;
     }
     
     /**
      * Figure out the media info - URI and Mime type for this...
      * 
-     * @return 
      */
     public void getMediaInfo() {
         if(mediaURI != null) {
@@ -59,6 +62,8 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
             mimeType = MediaPlayerComp.getMimeTypeByExtension(
                 extIndex != -1 ? uriTrim.substring(extIndex) : uriTrim);
         }
+        
+        docInfo = makeRequestDocInfo();
     }
     
     /**
@@ -75,9 +80,10 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
     
     public InputStream getMediaInputStream() throws IOException {
         InputStream result = null;
+        getMediaInfo();
         
-        result = htmlC.getRequestHandler().resourceRequested(
-            makeRequestDocInfo());
+        result = htmlC.getRequestHandler().resourceRequested(docInfo);
+        mediaSize = docInfo.getContentLength();
         
         if(result == null && htmlC.getHTMLCallback() != null) {
             htmlC.getHTMLCallback().parsingError(100, mediaEl.getTagName(), "src", 
@@ -86,7 +92,11 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
         
         return result;
     }
-
+    
+    public int getMediaSize() {
+        return mediaSize;
+    }
+    
     public String getMimeType() {
         getMediaInfo();
         System.out.println("mime = " + mimeType);

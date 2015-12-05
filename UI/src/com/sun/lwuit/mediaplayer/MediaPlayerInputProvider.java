@@ -62,4 +62,18 @@ public interface MediaPlayerInputProvider {
      * @return true if this media input has video - false otherwise
      */
     public boolean isVideo();
+    
+    /**
+     * Should return the size of the media that is to be played.  Live / infinite
+     * streams are impossible to handle here.(we don't supoprt the J2ME DataSource
+     * setup and Nokia implementations will attempt to fully read a stream 
+     * resulting in an OutOfMemory Exception).: 
+     * 
+     * It is likely that the size is accessible only AFTER getting the input
+     * stream : this would require connecting to the remote source / server
+     * etc.
+     * 
+     * @return Length of the input or -1 if not known.
+     */
+    public int getMediaSize();
 }

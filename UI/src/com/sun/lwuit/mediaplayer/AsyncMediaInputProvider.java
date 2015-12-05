@@ -57,7 +57,7 @@ public interface AsyncMediaInputProvider extends MediaPlayerInputProvider {
          * @param in InputStream containing media to play
          * @param mimeType The mime type of the media e.g. audio/mpeg
          */
-        public void mediaReady(InputStream in, String mimeType);
+        public void mediaReady(InputStream in, String mimeType, int mediaSize);
         
     } 
 }

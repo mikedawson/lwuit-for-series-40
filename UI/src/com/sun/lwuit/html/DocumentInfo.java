@@ -77,6 +77,8 @@ public class DocumentInfo {
     private boolean postRequest;
     private String encoding=ENCODING_ISO;
     private int expectedContentType=TYPE_HTML;
+    
+    private int contentLength;
 
     /**
      * Constructs the DocumentInfo with the given URL
@@ -85,6 +87,7 @@ public class DocumentInfo {
      */
     DocumentInfo(String url) {
         setUrl(url);
+        setContentLength(-1);
     }
 
     /**
@@ -95,6 +98,7 @@ public class DocumentInfo {
     DocumentInfo(String url,int type) {
         setUrl(url);
         expectedContentType=type;
+        setContentLength(-1);
     }
 
     /**
@@ -108,8 +112,35 @@ public class DocumentInfo {
         this.params = params;
         this.postRequest = postRequest;
         setUrl(url);
+        setContentLength(-1);
     }
 
+    /**
+     * Provides the content length of the item requested (in bytes) or -1 if 
+     * unknown.  -1 is the default.
+     * 
+     * This might be available only AFTER the input stream has been opened
+     * (e.g. when the underlying system has connected to the remote server
+     * etc)
+     * 
+     * @return Size of the item requested (in bytes) or -1 if unknown
+     */
+    public int getContentLength() {
+        return contentLength;
+    }
+
+    /**
+     * Sets the content length of the item being requested (in bytes) or -1
+     * if unknown (the default) 
+     * 
+     * @param contentLength Size of the item requested (in bytes) or -1 for unknown
+     */
+    public void setContentLength(int contentLength) {
+        this.contentLength = contentLength;
+    }
+
+    
+    
     /**
      * Returns the absolute URL associated with this DocumentInfo object
      *
