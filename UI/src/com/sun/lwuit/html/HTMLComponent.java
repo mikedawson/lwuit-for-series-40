@@ -1117,13 +1117,22 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                     setPageStatus(HTMLCallback.STATUS_ERROR);
                     isr = getStream("Parsing error "+iae.getMessage(), null);
                     newDoc=parser.parseHTML(isr);
+                }finally {
+                    try {
+                        if(is != null) {
+                            is.close();
+                        }
+                    }catch(Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (cancelled) {
                     isr=getStream("Page loading cancelled by user",null);
                     newDoc=parser.parseHTML(isr);
                 }
-
+                
+                
 
                 setPageStatus(HTMLCallback.STATUS_PARSED);
                 documentReady(docInfo, newDoc);
@@ -2985,7 +2994,6 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                       if (preTagCount!=0) {
                           comps=showPreTagText(text, curAlign);
                       } else {
-                          
                           if (FIXED_WIDTH) {
                             comps=showTextFixedWidth(text, curAlign);
                           } else {
