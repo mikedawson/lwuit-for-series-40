@@ -37,6 +37,7 @@ import com.sun.lwuit.Component;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.VideoComponent;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
@@ -203,7 +204,7 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         boolean cancelled = false;
         
         if(isVideo) {
-            final MIDPVideoPlaceholder placeholder = (MIDPVideoPlaceholder)videoComps.get(id);
+            final MIDPVideoPlaceholder placeholder = getVideoPlacerholderById(id);
             VideoComponent vc = null;
             
             boolean bufferTofile = mediaSize == -1 || mediaSize > MAXBUFFER;
@@ -334,19 +335,46 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         return null;
     }
     
+    /**
+     * Provides a placeholder component that is used to show either the video
+     * component itself or a placeholder label that shows loading status etc.
+     * 
+     * @param id ID of the player
+     * @return 
+     */
     public Component makeVideoPlaceholder(String id) {
         if(videoComps == null) {
             videoComps = new Hashtable();
         }
         
         Component comp = new MIDPVideoPlaceholder();
-        videoComps.put(id, comp);
+        videoComps.put(id, new WeakReference(comp));
         return comp;
+    }
+    
+    private MIDPVideoPlaceholder getVideoPlacerholderById(String id) {
+        MIDPVideoPlaceholder holder = null;
+        if(videoComps != null && videoComps.containsKey(id)) {
+            WeakReference ref = (WeakReference)videoComps.get(id);
+            Object refVal = ref.get();
+            if(refVal != null) {
+                holder = (MIDPVideoPlaceholder)refVal;
+            }else {
+                videoComps.remove(id);
+            }
+        }
+        
+        return holder;
     }
     
     public void startPlayer(String id) throws MediaException {
         if(videoComps != null && videoComps.containsKey(id)) {
-            ((MIDPVideoPlaceholder)videoComps.get(id)).getVideoComponent().start();
+            MIDPVideoPlaceholder placeholder = getVideoPlacerholderById(id);
+            if(placeholder != null) {
+                placeholder.getVideoComponent().start();
+            }else {
+                throw new MediaException("INVALID call to start video: player component gone: maybe it was removed from screen?");
+            }
         }else {
             getPlayerByID(id).start();
         }
@@ -382,7 +410,8 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         }
         
         if(videoComps != null && videoComps.containsKey(id)) {
-            ((MIDPVideoPlaceholder)videoComps.get(id)).handleVideoStopped();
+            MIDPVideoPlaceholder placeholder = getVideoPlacerholderById(id);
+            placeholder.handleVideoStopped();
         }
         
         if(me != null) {
@@ -405,9 +434,14 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
         }
         
         StringBuffer errors = new StringBuffer();
+        String idToRemove;
         for(int i = 0; i < playerIDS.size(); i++) {
             try {
-                stopPlayer(playerIDS.elementAt(i).toString());
+                idToRemove = playerIDS.elementAt(i).toString();
+                stopPlayer(idToRemove);
+                if(videoComps != null && videoComps.containsKey(idToRemove)) {
+                    videoComps.remove(idToRemove);
+                }
             }catch(Exception e) {
                 errors.append(e.toString()).append(e.getMessage()).append('\n');
             }

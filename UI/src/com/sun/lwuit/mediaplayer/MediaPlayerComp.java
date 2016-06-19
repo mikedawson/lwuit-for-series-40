@@ -154,6 +154,8 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
      * @param provider MediaPlayerInputProvider that will give us the required stream
      * @param callback Optional HTMLCallback that can be used to reporting back using the parseError method (can be null)
      * @param controlsEnabled True to enable play/pause/stop buttons false otherwise
+     * @param preferVideoW Preferred width for the video component (applies only to video)
+     * @param preferVideoH Preferred height for the video component (applies only to video)
      */
     public MediaPlayerComp(LWUITMediaPlayer mediaPlayer, MediaPlayerInputProvider provider, HTMLCallback callback, boolean controlsEnabled, int preferVideoW, int preferVideoH) {
         this.mediaPlayer = mediaPlayer;
@@ -224,7 +226,7 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         
         setupButtons();
     }
-    
+
     /**
      * Return the buttons that are focusable (used by HTMLComponent) for 
      * firstFocusable
