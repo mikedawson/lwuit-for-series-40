@@ -28,7 +28,9 @@ import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Graphics;
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.HTMLCallback;
@@ -251,6 +253,11 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
         }
     }
     
+    public void showError(String err) {
+        Dialog.show("Error", new TextArea(err, 3, 30),new Command[]{new Command("OK")});
+    }
+    
+    
     /**
      * Get the mime type likely for this media extension type
      * 
@@ -418,14 +425,19 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
     
     
     public void mediaReady(InputStream in, String mimeType, int mediaSize) {
-        this.in = in;
-        this.mediaSize = mediaSize;
-        callbackParsingError(101, "RealizePlayerThread", 
-                "mediaReady", null, " : comp.in=" + in + 
-                " comp.mediaPlayer =" + mediaPlayer);
-        
-        mediaPlayer.addMediaPlayerListener(playerID, this);
-        startPlaying();
+        if(in != null) {
+           this.in = in;
+            this.mediaSize = mediaSize;
+            callbackParsingError(101, "RealizePlayerThread", 
+                    "mediaReady", null, " : comp.in=" + in + 
+                    " comp.mediaPlayer =" + mediaPlayer);
+
+            mediaPlayer.addMediaPlayerListener(playerID, this);
+            startPlaying();
+        }else {
+            showError("Incompatible format");
+            stop();
+        }
     }
     
     public void stop() {
@@ -463,13 +475,18 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             
             try {
                 comp.in = comp.provider.getMediaInputStream();
-                comp.mediaSize = comp.provider.getMediaSize();
-                comp.callbackParsingError(101, "RealizePlayerThread", 
-                        "addPlayerListener", null, " : comp.in=" + comp.in + " comp.mediaPlayer =" + comp.mediaPlayer);
-                comp.mediaPlayer.addMediaPlayerListener(comp.playerID, comp);
-                comp.callbackParsingError(101, "RealizePlayerThread", 
-                        "startPlaying", null, " : comp.in=" + comp.in + " playerID=" + comp.playerID);
-                comp.startPlaying();
+                if(comp.in != null) {
+                    comp.mediaSize = comp.provider.getMediaSize();
+                    comp.callbackParsingError(101, "RealizePlayerThread", 
+                            "addPlayerListener", null, " : comp.in=" + comp.in + " comp.mediaPlayer =" + comp.mediaPlayer);
+                    comp.mediaPlayer.addMediaPlayerListener(comp.playerID, comp);
+                    comp.callbackParsingError(101, "RealizePlayerThread", 
+                            "startPlaying", null, " : comp.in=" + comp.in + " playerID=" + comp.playerID);
+                    comp.startPlaying();
+                }else {
+                    comp.showError("Format Incompatible");
+                    comp.stop();
+                }
             }catch(Exception e) {
                 if(comp.callback != null) {
                     comp.callbackParsingError(101, "RealizePlayerThread", 

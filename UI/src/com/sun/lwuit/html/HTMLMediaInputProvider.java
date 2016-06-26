@@ -1,13 +1,19 @@
 package com.sun.lwuit.html;
 
+import com.sun.lwuit.mediaplayer.LWUITMediaPlayer;
 import com.sun.lwuit.mediaplayer.MediaPlayerComp;
 import com.sun.lwuit.mediaplayer.MediaPlayerInputProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Vector;
 
 /**
  *
- * @author mike
+ * Class that implements MediaPlayerInputProvider to provide information about 
+ * a media stream (mediaType, stream length, and input stream) given an HTMLElement 
+ * that represents the audio or video tag.
+ * 
+ *  @author mike
  */
 public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
 
@@ -20,9 +26,18 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
     protected DocumentInfo docInfo; 
     protected int mediaSize;
     
-    public HTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl) {
+    protected LWUITMediaPlayer player;
+    
+    /**
+     * 
+     * @param htmlC
+     * @param mediaEl
+     * @param player 
+     */
+    public HTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl, LWUITMediaPlayer player) {
         this.htmlC = htmlC;
         this.mediaEl = mediaEl;
+        this.player = player;
         this.mediaSize = -1;
     }
     
@@ -38,14 +53,30 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
         //Figure out the source of the element
         String source = mediaEl.getAttributeById(HTMLElement.ATTR_SRC);
         if (source == null) {
-            //means the source is not on the tag itself but on the source tags - find them
-            HTMLElement srcTag = mediaEl.getFirstChildByTagId(
-                    HTMLElement.TAG_SOURCE);
-            if (srcTag != null) {
+            //TODO: Use this area to figure out which of types we prefer amongst multiple source tags
+            Vector availableSourceEls = mediaEl.getDescendantsByTagId(HTMLElement.TAG_SOURCE);
+            String[] availableFormats = new String[availableSourceEls.size()];
+            for(int i = 0; i < availableFormats.length; i++) {
+                availableFormats[i] = ((HTMLElement)availableSourceEls.elementAt(i)).getAttributeById(HTMLElement.ATTR_TYPE);
+            }
+            
+            int preferredFormat = player.getPreferredFormat(availableFormats, 
+                mediaEl.getTagId() == HTMLElement.TAG_VIDEO ? HTMLCallback.MEDIA_VIDEO : HTMLCallback.MEDIA_AUDIO);
+            HTMLElement srcTag = null;
+            
+            if(preferredFormat != -1) {
+                srcTag = (HTMLElement)availableSourceEls.elementAt(preferredFormat);
                 source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
                 mimeType = srcTag.getAttributeById(HTMLElement.ATTR_TYPE);
             }
         }
+        
+        //check and be sure that we have found the source
+        if(source == null) {
+            //no suitable format found for playing on this device - return null
+            return;
+        }
+        
 
         mediaURI = htmlC.getDocumentInfo().convertURL(source);
         
@@ -69,25 +100,34 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
     /**
      * Create a DocumentInfo object for the requestHandler 
      * 
+     * If there is no suitable media type available in the source tags that
+     * can be played by this device we will return null
+     * 
      * @return DocumentInfo
      */
     protected DocumentInfo makeRequestDocInfo() {
         getMediaInfo();
-        int type = mediaEl.getTagId() == HTMLElement.TAG_VIDEO ? 
-            DocumentInfo.TYPE_VIDEO : DocumentInfo.TYPE_AUDIO;
-        return new DocumentInfo(mediaURI, type);
+        if(mediaURI != null) {
+            int type = mediaEl.getTagId() == HTMLElement.TAG_VIDEO ? 
+                DocumentInfo.TYPE_VIDEO : DocumentInfo.TYPE_AUDIO;
+            return new DocumentInfo(mediaURI, type);
+        }else {
+            return null;
+        }
     }
     
     public InputStream getMediaInputStream() throws IOException {
         InputStream result = null;
         getMediaInfo();
         
-        result = htmlC.getRequestHandler().resourceRequested(docInfo);
-        mediaSize = docInfo.getContentLength();
-        
-        if(result == null && htmlC.getHTMLCallback() != null) {
-            htmlC.getHTMLCallback().parsingError(100, mediaEl.getTagName(), "src", 
-                mediaURI, "Request handler gives null accessing stream:");
+        if(docInfo != null) {
+            result = htmlC.getRequestHandler().resourceRequested(docInfo);
+            mediaSize = docInfo.getContentLength();
+
+            if(result == null && htmlC.getHTMLCallback() != null) {
+                htmlC.getHTMLCallback().parsingError(100, mediaEl.getTagName(), "src", 
+                    mediaURI, "Request handler gives null accessing stream:");
+            }
         }
         
         return result;

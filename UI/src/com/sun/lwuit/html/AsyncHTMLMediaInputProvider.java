@@ -6,6 +6,7 @@
 package com.sun.lwuit.html;
 
 import com.sun.lwuit.mediaplayer.AsyncMediaInputProvider;
+import com.sun.lwuit.mediaplayer.LWUITMediaPlayer;
 import java.io.InputStream;
 
 /**
@@ -16,8 +17,8 @@ public class AsyncHTMLMediaInputProvider extends HTMLMediaInputProvider implemen
     
     private IOCallback ioCallback;
     
-    public AsyncHTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl) {
-        super(htmlC, mediaEl);
+    public AsyncHTMLMediaInputProvider(HTMLComponent htmlC, HTMLElement mediaEl, LWUITMediaPlayer player) {
+        super(htmlC, mediaEl, player);
     }
 
     public void getMediaInputStreamAsync(IOCallback ioCallback) {

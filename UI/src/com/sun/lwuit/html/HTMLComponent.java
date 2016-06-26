@@ -48,6 +48,7 @@ import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
+import com.sun.lwuit.mediaplayer.LWUITMediaPlayer;
 import com.sun.lwuit.mediaplayer.MediaPlayerComp;
 import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.plaf.Style;
@@ -3393,10 +3394,12 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                         boolean controlsEnabled = 
                            child.getAttributeById(HTMLElement.ATTR_CONTROLS) != null;
                         HTMLMediaInputProvider provider;
+                        LWUITMediaPlayer player = DefaultLWUITMediaPlayerManager.getInstance().getPlayer();
                         if(handler instanceof AsyncDocumentRequestHandler) {
-                            provider = new AsyncHTMLMediaInputProvider(this, child);
+                            provider = new AsyncHTMLMediaInputProvider(this, child, 
+                                player);
                         }else {
-                            provider = new HTMLMediaInputProvider(this, child);
+                            provider = new HTMLMediaInputProvider(this, child, player);
                         }
                         
                         int cWidth = calcSize(getWidth(), 
@@ -3405,8 +3408,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                             child.getAttributeById(HTMLElement.ATTR_HEIGHT),
                             (int)((getWidth()*3)/4),false);
                         
-                        MediaPlayerComp mPlayer = new MediaPlayerComp(
-                            DefaultLWUITMediaPlayerManager.getInstance().getPlayer(), 
+                        MediaPlayerComp mPlayer = new MediaPlayerComp(player, 
                             provider, htmlCallback, controlsEnabled, cWidth, cHeight);
                         curLine.addComponent(mPlayer);
                         child.setAssociatedComponents(mPlayer);

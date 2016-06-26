@@ -78,6 +78,19 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
     
     
     /**
+     * In reality most J2ME feature phones like the 3gp format.  3GP guarantees 
+     * a usable resolution etc.  A .mp4 file can contain almost anything - 99% 
+     * of the time if 3gp video is available that's what we prefer
+     */
+    public static String PREFERRED_VIDEO_TYPE = "video/3gpp";
+    
+    /**
+     * In reality most J2ME phones are best off playing mp3 audio, mp3 means
+     * smaller files and thus less memory usage
+     */
+    public static String PREFERRED_AUDIO_TYPE = "audio/mpeg";
+    
+    /**
      * When the size of a file to playback exceeds the available memory
      * we need to save the file to a directory and create the player
      * using the file URI instead
@@ -497,6 +510,53 @@ public class MIDPMediaPlayer implements LWUITMediaPlayer, PlayerListener{
                     id, event, eventData);
             }
         }
+    }
+    
+    /**
+     * Given a string array and an individual string: see if there is any string in the array
+     * that starts with the string
+     * 
+     * @param arr Array of strings
+     * @param str String to look for in the array using startsWith
+     * 
+     * @return index of the first item that starts with that in the array; -1 if not found
+     */
+    private int startsWithInArray(String[] arr, String str) {
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] != null && arr[i].startsWith(str)) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+
+    /**
+     * 
+     * @param availableFormats
+     * @param mediaType
+     * 
+     * @return 
+     */
+    public int getPreferredFormat(String[] availableFormats, int mediaType) {
+        String[] deviceFormats = Manager.getSupportedContentTypes(null);
+        
+        String midpPreferredType = mediaType == HTMLCallback.MEDIA_VIDEO ? 
+            PREFERRED_VIDEO_TYPE : PREFERRED_AUDIO_TYPE;
+        int index = startsWithInArray(availableFormats, midpPreferredType);
+        
+        if(index != -1 && startsWithInArray(deviceFormats, midpPreferredType) != -1) {
+            return index;
+        }
+        
+        for(int i = 0; i < availableFormats.length; i++) {
+            if(startsWithInArray(deviceFormats, availableFormats[i]) != -1) {
+                return i;
+            }
+        }
+        
+        //There is no suitable format that can be played and is available
+        return -1;
     }
     
 }

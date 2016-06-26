@@ -173,5 +173,17 @@ public interface LWUITMediaPlayer {
      */
     public int clearTempFiles();
     
+    /**
+     * When a media file is available in a variety of different sources this
+     * method should be used to determine which format the player would
+     * prefer for this platform.
+     * 
+     * @param availableFormats: An array of the formats in which this media is available: e.g. video/3gpp, video/mp4, etc.
+     * @param mediaType: HTMLCallback.MEDIA_VIDEO or HTMLCallback.MEDIA_AUDIO
+     * 
+     * @return The index from the array of the preferred format to use; or -1 if no suitable type is found in the array
+     */
+    public int getPreferredFormat(String[] availableFormats, int mediaType);
+    
     
 }
