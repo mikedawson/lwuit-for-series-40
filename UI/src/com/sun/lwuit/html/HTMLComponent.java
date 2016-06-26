@@ -63,6 +63,15 @@ import java.util.Vector;
 
 /**
  * HTMLComponent is a LWUIT Component that renders HTML documents that conform to the XHTML Mobile Profile 1.0
+ * 
+ * Some extras that are supported in addition to the XHTML Mobile Profile:
+ *  - HTML5 style data- attributes: these are preserved and can be accessed through the DOM
+ *  - audio and video tags - these are supported using the media player component if enabled
+ *  - data-src-micro for img tags : This tag can be added to an img and will be used instead 
+ *    of the main src tag - This allows the page to use a smaller image consuming
+ *    less memory targeting this Component whilst continuing to use a larger image
+ *    for devices with more resources.
+ * 
  *
  * @author Ofir Leitner
  */
@@ -2370,6 +2379,9 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
 
     /**
      * Handles the IMG tag. This includes calculating its size (if available), applying any links/accesskeys and adding it to the download queue
+     * 
+     * If the image element has an attribute data-src-micro we will use this
+     * instead of the main src element
      *
      * @param imgElement the IMG element
      * @param align th current alignment
@@ -2377,7 +2389,11 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
      */
     private void handleImage(HTMLElement imgElement,int align,Command cmd) {
 
-            String imageUrl = imgElement.getAttributeById(HTMLElement.ATTR_SRC);
+            String imageUrl = imgElement.getAttributeById(HTMLElement.ATTR_SRC_MICRO);            
+            if(imageUrl == null) {
+                imageUrl = imgElement.getAttributeById(HTMLElement.ATTR_SRC);
+            }
+                
             Label imgLabel=null;
             
             if(imgReservationSpace == null) {

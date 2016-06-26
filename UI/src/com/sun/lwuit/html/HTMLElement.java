@@ -288,6 +288,9 @@ static final String[] TAG_NAMES = {
  //Media tags
  public static final int ATTR_AUTOPLAY = 74;
  public static final int ATTR_CONTROLS = 75;
+ 
+ //Alternative Micro Source
+ public static final int ATTR_SRC_MICRO = 76;
 
   /**
   * Defines the allowed attribute names, these are specified according to the ATTR_* constants numbering.
@@ -301,7 +304,8 @@ static final String[] TAG_NAMES = {
     "cols","rows","dir","border",
     "color","face","shape","coords","usemap",
     "lang","cellspacing","cellpadding","frame","rules",
-    "disabled","readonly","ismap", "autoplay", "controls"
+    "disabled","readonly","ismap", "autoplay", "controls", 
+    "data-src-micro"
  };
 
  /**
@@ -506,7 +510,8 @@ static final String[] TAG_NAMES = {
         ATTR_WIDTH, // number[%]
         ATTR_USEMAP, // for HTML4
         ATTR_BORDER, // for HTML4
-        ATTR_ISMAP // for HTML4
+        ATTR_ISMAP, // for HTML4
+        ATTR_SRC_MICRO // Alternative resized image - URL
      }, // IMG = 46;
 
      //Object Module -
@@ -759,7 +764,8 @@ static final String[] TAG_NAMES = {
     TYPE_NMTOKEN, //ATTR_READONLY = 72;
     TYPE_NMTOKEN, //ATTR_ISMAP = 73;
     TYPE_CDATA,//ATTR_AUTOPLAY = 74
-    TYPE_CDATA //ATTR_CONTROLS = 57
+    TYPE_CDATA, //ATTR_CONTROLS = 75
+    TYPE_URL, //ATTR_SRC_MICRO = 76
  };
 
 /**
@@ -1154,19 +1160,15 @@ static int getColor(String colorStr,int defaultColor) {
             }
         }
 
-        if(attribute.startsWith("data-")) {
-            setAttribute((Object)attribute, value);
-        }else if (attrId==-1) {
-            return HTMLCallback.ERROR_ATTRIBUTE_NOT_SUPPORTED;
-
-        } else {
-            if (isValid(ATTRIBUTE_TYPES[attrId], value)) {
-                setAttribute(new Integer(attrId), value);
-            } else {
-                return HTMLCallback.ERROR_ATTIBUTE_VALUE_INVALID;
-            }
-        }
         
+        if (attrId != -1 && isValid(ATTRIBUTE_TYPES[attrId], value)) {
+            setAttribute(new Integer(attrId), value);
+        }else if(attribute.startsWith("data-")) {
+            setAttribute((Object)attribute, value);
+        }else {
+            return HTMLCallback.ERROR_ATTRIBUTE_NOT_SUPPORTED;
+        }
+
         return -1;
     }
 
