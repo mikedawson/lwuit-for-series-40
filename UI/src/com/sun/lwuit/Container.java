@@ -1011,6 +1011,9 @@ public class Container extends Component {
                     next.getWidth(),
                     next.getHeight()))) {
                 //scrollComponentToVisible(next);
+                if(edge) {//there are no more focusable components - move the viewport by pixels anyway
+                    scrollRectToVisible(x, y, w, h, this);
+                }
                 return true;
             } else {
                 if (!scrollOutOfBounds) {

@@ -141,6 +141,13 @@ public class Form extends Container {
      * Indicates whether focus should cycle within the form
      */
     private boolean cyclicFocus = true;
+    
+    /**
+     * Indicates whether we should scroll exactly to a component once it is
+     * completely visible.  This causes the scroll to bounce to the top once
+     * no more focusable components are visible
+     */
+    private boolean scrollToCompWhenVisible = true;
 
     private int tactileTouchDuration;
 
@@ -2232,6 +2239,31 @@ public class Form extends Container {
         return cyclicFocus;
     }
 
+    /**
+     * Whether or not we should scroll exactly to the position of a component
+     * once it becomes visible.  This causes a bounce effect when there are no
+     * more components left in the direction of scrolling.  This can also cause
+     * a problem if there are non-focusable components underneath focusable ones
+     * preventing the user from seeing them.
+     * 
+     * @return true if scrolling should jump to a component once it is completely visible
+     */
+    public boolean isScrollToCompWhenVisible() {
+        return scrollToCompWhenVisible;
+    }
+
+    /**
+     * Setter for scrollToCompWhenVisible
+     * 
+     * @see Form#isScrollToCompWhenVisible() 
+     * @param scrollToCompWhenVisible true if this mode should be enabled
+     */
+    public void setScrollToCompWhenVisible(boolean scrollToCompWhenVisible) {
+        this.scrollToCompWhenVisible = scrollToCompWhenVisible;
+    }
+    
+    
+
     private void updateFocus(int gameAction) {
         Component focused = getFocused();
         switch (gameAction) {
@@ -2276,7 +2308,10 @@ public class Form extends Container {
         } else {
             if (moveScrollTowards(gameAction, focused)) {
                 setFocused(focused); 
-                scrollComponentToVisible(focused);
+                
+                if(isScrollToCompWhenVisible()) {
+                    scrollComponentToVisible(focused);
+                }
             }
         }
         
