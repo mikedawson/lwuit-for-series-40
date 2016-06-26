@@ -65,7 +65,7 @@ class HTMLLink extends Button implements ActionListener {
         
         setTickerEnabled(false);
         addActionListener(this);
-        
+       
         if (parentLink!=null) {
             setFocusable(false);
             parentLink.addChildLink(this);

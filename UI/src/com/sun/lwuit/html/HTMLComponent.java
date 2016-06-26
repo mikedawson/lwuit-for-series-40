@@ -2233,6 +2233,10 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
             ((HTMLLink)lbl).getPressedStyle().setPadding(0,0,0,0);
             lbl.getSelectedStyle().setTextDecoration(textDecoration);
             ((HTMLLink)lbl).getPressedStyle().setTextDecoration(textDecoration);
+            
+            lbl.getSelectedStyle().setBgColor(color);
+            lbl.getSelectedStyle().setFgColor(lbl.getStyle().getBgColor());
+            lbl.getSelectedStyle().setBgTransparency(255);
         } else {
             if (labelForID!=null) {
                 lbl=new ForLabel(str, this, labelForID);
@@ -2244,7 +2248,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
             } else {
                 lbl=new Label(str);
             }
-
+            lbl.getSelectedStyle().setFgColor(color);
         }
         lbl.getStyle().setMargin(0,0,0,0);
         lbl.getStyle().setPadding(0,0,0,0);
@@ -2268,7 +2272,7 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
         }
 
         lbl.getUnselectedStyle().setFgColor(color);
-        lbl.getSelectedStyle().setFgColor(color);
+        
 
         //lbl.setVerticalAlignment(Component.BOTTOM); //TODO - This still doesn't align as label alignment in LWUIT refers to the text alignment in relation to its icon (if exists)
         lbl.getUnselectedStyle().setFont(font.getFont());
