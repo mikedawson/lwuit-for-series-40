@@ -85,7 +85,7 @@ public class DocumentInfo {
      * 
      * @param url The URL of the document
      */
-    DocumentInfo(String url) {
+    public DocumentInfo(String url) {
         setUrl(url);
         setContentLength(-1);
     }
@@ -95,7 +95,7 @@ public class DocumentInfo {
      *
      * @param url The URL of the document
      */
-    DocumentInfo(String url,int type) {
+    public DocumentInfo(String url,int type) {
         setUrl(url);
         expectedContentType=type;
         setContentLength(-1);
@@ -108,7 +108,7 @@ public class DocumentInfo {
      * @param params The parameters
      * @param postRequest true if this is a POST request, false otherwise (i.e. GET)
      */
-    DocumentInfo(String url, String params, boolean postRequest) {
+    public DocumentInfo(String url, String params, boolean postRequest) {
         this.params = params;
         this.postRequest = postRequest;
         setUrl(url);
