@@ -1655,8 +1655,29 @@ static int getColor(String colorStr,int defaultColor) {
         }
         
         Vector v = new Vector();
+        getDescendantsByClassInternal(v,tagTypes, new String[]{cls}, depth);
+        return v;
+    }
+    
+    /**
+     * Return all descendants that match any of the given CSS classes
+     */
+    public Vector getDescendantsByClasses(String[] cls, int[] tagTypes, int depth) {
+        if(getChildren() == null) {
+            return null;
+        }
+        
+        Vector v = new Vector();
         getDescendantsByClassInternal(v,tagTypes, cls, depth);
         return v;
+    }
+    
+    
+    /**
+     * Return all descendants that match any of the given CSS classes
+     */
+    public Vector getDescendantsByClasses(String[] cls, int[] tagTypes) {
+        return getDescendantsByClasses(cls, tagTypes, DEPTH_INFINITE);
     }
     
     /**
@@ -1674,8 +1695,8 @@ static int getColor(String colorStr,int defaultColor) {
         return getDescendantsByClass(cls, tagTypes, DEPTH_INFINITE);
     }
     
-    private void getDescendantsByClassInternal(Vector v, int[] tagTypes, String cls, int depth) {
-        int i = 0;
+    private void getDescendantsByClassInternal(Vector v, int[] tagTypes, String[] cls, int depth) {
+        int i = 0, j;
         Vector children = getChildren();
         
         HTMLElement child;
@@ -1686,8 +1707,13 @@ static int getColor(String colorStr,int defaultColor) {
                     child.getDescendantsByClassInternal(v, tagTypes, cls, depth-1);
                 }
                 
-                if((tagTypes == null || child.isTagIdIn(tagTypes)) && child.hasClass(cls)) {
-                    v.addElement(child);
+                if((tagTypes == null || child.isTagIdIn(tagTypes))) {
+                    for(j = 0; j < cls.length; j++) {
+                        if(child.hasClass(cls[j])){
+                            v.addElement(child);
+                            break;
+                        }
+                    }   
                 }
             }
         }
@@ -1731,6 +1757,23 @@ static int getColor(String colorStr,int defaultColor) {
     public boolean isTagIdIn(int[] tagIds) {
         for(int i = 0; i < tagIds.length; i++) {
             if(tagIds[i] == id) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Determine if this element is or is not a descendant of another element
+     * 
+     * @param el The Element to check if this element is a descendant of
+     * @return True if this is a descendant of the given element, false otherwise
+     */
+    public boolean isDescendantOf(Element el) {
+        Element currentEl = this;
+        while((currentEl = currentEl.getParent()) != null) {
+            if(el == currentEl) {
                 return true;
             }
         }

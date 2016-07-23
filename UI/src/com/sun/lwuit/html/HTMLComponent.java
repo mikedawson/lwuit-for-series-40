@@ -210,13 +210,14 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
      private static final int INPUT_IMAGE = 7; // image is not officially supported in XHTML-MP 1.0 but we support it
      //private static final int INPUT_BUTTON = 8; //button is not supported in XHTML-MP 1.0
      //private static final int INPUT_FILE = 9; //file upload is not supported in XHTML-MP 1.0
+     private static final int INPUT_NUMBER = 8;
      
     /**
      * Defines the possible values for the type attribute in the input tag, ordered according to the INPUT_* constants
      */
     private static String[] INPUT_TYPE_STRINGS = {
             "checkbox","hidden","password","radio","reset",
-            "submit","text","image" 
+            "submit","text","image", "number"
     };
 
     /**
@@ -2658,13 +2659,14 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                 }
                 break;
             case INPUT_TEXT:
+            case INPUT_NUMBER:
             case INPUT_PASSWORD:
                 TextField tf = new TextField(value);
                 tf.setLeftAndRightEditingTrigger(false);
                 if (typeID==INPUT_PASSWORD) {
                     tf.setConstraint(TextField.PASSWORD);
                 }
-
+                
                 if (SUPPORT_INPUT_FORMAT) {
                     HTMLInputFormat inputFormat=HTMLInputFormat.getInputFormat(element.getAttributeById(HTMLElement.ATTR_FORMAT));
                     if (inputFormat!=null) {
@@ -2681,6 +2683,11 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                             curForm.setEmptyOK(tf, false);
                         }
                     }
+                }
+                
+                if(typeID == INPUT_NUMBER) {
+                    tf.setInputMode("123");
+                    tf.setInputModeOrder(new String[]{"123"});
                 }
 
                 int size=getInt(element.getAttributeById(HTMLElement.ATTR_SIZE));
