@@ -346,12 +346,15 @@ public class MediaPlayerComp extends Container implements ActionListener, MediaP
             actionAfterRealize.put(playerID, new Integer(PLAY));
             setPlayButtonCommand(PAUSE);
             
-            if(provider instanceof AsyncMediaInputProvider) {
-                ((AsyncMediaInputProvider)provider).getMediaInputStreamAsync(this);
-            }else {
-                realizeThread = new RealizePlayerThread();
-                realizeThread.start();
+            if(provider.hasSrc()) {
+                if(provider instanceof AsyncMediaInputProvider) {
+                    ((AsyncMediaInputProvider)provider).getMediaInputStreamAsync(this);
+                }else {
+                    realizeThread = new RealizePlayerThread();
+                    realizeThread.start();
+                }
             }
+            
         }else if(state == LOADING) {
             //it's loading right now - so toggle what to do after realization finishes
             Object statusObj = actionAfterRealize.get(playerID);

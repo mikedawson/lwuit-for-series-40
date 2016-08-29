@@ -2471,10 +2471,9 @@ public class HTMLComponent extends Container implements ActionListener,AsyncDocu
                         imgLabel=new Label(altText);
                     }
 
-                    
+                    iWidth+=imgReservationSpace[LEFT] + imgReservationSpace[RIGHT];
+                    iHeight+=imgReservationSpace[TOP] + imgReservationSpace[BOTTOM];
                     if ((iWidth!=0) || (iHeight!=0)) { // reserve space while loading image if either width or height are specified, otherwise we don't know how much to reserve
-                        iWidth+=imgReservationSpace[LEFT] + imgReservationSpace[RIGHT];
-                        iHeight+=imgReservationSpace[TOP] + imgReservationSpace[BOTTOM];
                         imgLabel.setPreferredSize(new Dimension(iWidth,iHeight));
                     } else { // If no space is reserved, make a minimal text, otherwise LWUIT won't calculate the size right after the image loads
                         if ((imgLabel.getText()==null) || (imgLabel.getText().equals(""))) {

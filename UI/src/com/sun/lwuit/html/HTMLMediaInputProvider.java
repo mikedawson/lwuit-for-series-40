@@ -116,6 +116,15 @@ public class HTMLMediaInputProvider implements MediaPlayerInputProvider{
         }
     }
     
+    /**
+     * @{inheritDoc}
+     */
+    public boolean hasSrc() {
+        getMediaInfo();
+        return mediaURI != null;
+    }
+    
+    
     public InputStream getMediaInputStream() throws IOException {
         InputStream result = null;
         getMediaInfo();

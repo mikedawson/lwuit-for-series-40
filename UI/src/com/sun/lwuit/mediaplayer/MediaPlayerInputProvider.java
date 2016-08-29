@@ -76,4 +76,16 @@ public interface MediaPlayerInputProvider {
      * @return Length of the input or -1 if not known.
      */
     public int getMediaSize();
+    
+    /**
+     * Returns true if there is a source eligible to try playing on this device.
+     * This is useful when there is a list of source elements with mime types: if
+     * we can see by looking at this that no src is compatible with this device we
+     * can drop it.  It might be the mime type is not yet known... in which case
+     * it might still fail.
+     * 
+     * @return true if there's hope to play this file (eligible source), false otherwise
+     */
+    public boolean hasSrc();
+    
 }
